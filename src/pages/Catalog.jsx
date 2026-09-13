@@ -135,7 +135,8 @@ export default function Catalog() {
     setModalProduct(product);
     const feats = isEn ? (product.featuresEn || product.features || []) : (product.features || []);
     const featsList = Array.isArray(feats) ? feats : (typeof feats === 'string' ? feats.split('\n') : []);
-    setModalTab(featsList.length > 0 ? 'info' : 'nutrition');
+    const hasInfoImages = Array.isArray(product.infoImages) && product.infoImages.length > 0;
+    setModalTab(featsList.length > 0 || hasInfoImages ? 'info' : 'nutrition');
   };
 
   // 필터 조건에 따른 제품 리스트
@@ -645,7 +646,7 @@ export default function Catalog() {
               {/* 하단 탭: 제품 특징 / 원료 및 성분 */}
               <div>
                 <div className="bm-modal-tabs">
-                  {modalFeaturesList.length > 0 && (
+                  {(modalFeaturesList.length > 0 || (Array.isArray(modalProduct.infoImages) && modalProduct.infoImages.length > 0)) && (
                     <button
                       className={`bm-modal-tab-btn ${modalTab === 'info' ? 'active' : ''}`}
                       onClick={() => setModalTab('info')}
@@ -674,6 +675,19 @@ export default function Catalog() {
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  )}
+
+                  {modalTab === 'info' && Array.isArray(modalProduct.infoImages) && modalProduct.infoImages.length > 0 && (
+                    <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {modalProduct.infoImages.map((src, idx) => (
+                        <img
+                          key={idx}
+                          src={src}
+                          alt={`${isEn ? modalProduct.nameEn : modalProduct.nameKo} 상세이미지 ${idx + 1}`}
+                          style={{ width: '100%', height: 'auto', borderRadius: '8px', border: '1px solid #EAEAEA' }}
+                        />
+                      ))}
                     </div>
                   )}
 
