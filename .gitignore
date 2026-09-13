@@ -4,6 +4,8 @@ node_modules/
 dist/
 dist-ssr/
 *.local
+data/
+.reports/
 
 # Editor directories and files
 .vscode/*

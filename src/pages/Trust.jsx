@@ -1,67 +1,117 @@
-// 이 파일은 "신뢰와 인증" 페이지입니다 (주소: /trust).
-// 인증서(ISO 등), 보유 특허/디자인등록, 박람회 참가 사진 갤러리, 유통 파트너사 목록을 한 페이지에 모아 보여줍니다.
-import React, { useState } from 'react';
+// 리뉴얼 신뢰와 인증 페이지 (Trust & Certification Renewal 2026)
+// 1. 역동적 서브 히어로 (투명 헤더 연동 + 시네마틱 다크 틴트)
+// 2. 신뢰 지표 KPI 카드 바 (국제 인증, 특허/디자인, 글로벌 박람회, 대형 유통망)
+// 3. 서브 앵커 네비게이션 (품질 인증 | 보유 특허 | 글로벌 박람회 | 파트너사)
+// 4. 국제 품질/안전 인증 시스템 4열 카드 (ISO 14001, ISO 22000, HACCP, AAFCO)
+// 5. 특허 및 지식재산권 5열 쇼케이스 카드 (클릭 시 고해상도 증서 팝업)
+// 6. 연도별 글로벌 엑스포 전시 갤러리 (2019~2025, 라이트박스 팝업 및 이전/다음 탐색)
+// 7. 대형 유통 네트워크 및 펫 전문 유통사 파트너 로고 쇼케이스
+
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { partners } from '../data/partners';
 import { petRetailPartners } from '../data/petRetailPartners';
 import { expoPhotos } from '../data/expo';
+import iso14001Logo from '../assets/cert_logos/iso14001.png';
+import iso22000Logo from '../assets/cert_logos/iso22000.png';
+import haccpLogo from '../assets/cert_logos/haccp.png';
+import aafcoLogo from '../assets/cert_logos/aafco_black.png';
+
+const certLogoMap = {
+  'ISO 14001': iso14001Logo,
+  'ISO 22000': iso22000Logo,
+  'HACCP': haccpLogo,
+  'AAFCO': aafcoLogo,
+};
 
 export default function Trust() {
   const { lang } = useLanguage();
   const isEn = lang === 'en';
 
-  // 현재 팝업(모달)으로 확대해서 보고 있는 항목 상태 (각각 null이면 닫힘)
+  // 모달 상태 관리
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(null);
   const [selectedCert, setSelectedCert] = useState(null);
   const [selectedPatent, setSelectedPatent] = useState(null);
+  const [activeSection, setActiveSection] = useState('certs');
+
+  // ESC 키로 모달 닫기
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setSelectedPhotoIndex(null);
+        setSelectedCert(null);
+        setSelectedPatent(null);
+      }
+    };
+    if (selectedPhotoIndex !== null || selectedCert !== null || selectedPatent !== null) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedPhotoIndex, selectedCert, selectedPatent]);
+
+  // 부드러운 스크롤 이동 함수
+  const scrollToSection = (id) => {
+    setActiveSection(id);
+    const el = document.getElementById(id);
+    if (el) {
+      const yOffset = -90;
+      const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
 
   // 인증서 목록 데이터 (ISO 14001, ISO 22000, HACCP, AAFCO)
   const certifications = [
     {
       code: 'ISO 14001',
-      titleKo: '환경경영시스템 (ISO 14001)',
+      titleKo: '환경경영시스템 인증',
       titleEn: 'Environmental Management System',
-      descKo: '생산 전 과정에서 환경 영향을 최소화하는 국제 표준 환경경영시스템을 적용합니다.',
-      descEn: 'Certified environmental management system minimizing environmental impact across production processes.',
+      descKo: '생산 전 과정에서 환경 영향을 최소화하고 친환경 제조 기준을 엄격히 준수하는 국제 환경경영 표준을 적용합니다.',
+      descEn: 'Certified international environmental management standard minimizing footprint across all production stages.',
       image: './assets/certifications/iso14001.png',
-      imageEn: './assets/certifications/iso14001_en.png'
+      imageEn: './assets/certifications/iso14001_en.png',
+      logo: './assets/cert_logos/iso14001_logo.svg'
     },
     {
       code: 'ISO 22000',
-      titleKo: '식품안전경영시스템 (ISO 22000)',
+      titleKo: '식품안전경영시스템 인증',
       titleEn: 'Food Safety Management System',
-      descKo: '원료 입고부터 제조, 포장 전 과정에 걸쳐 국제 표준 식품안전 경영시스템을 적용합니다.',
-      descEn: 'Certified international food safety management from raw materials to final packaging.',
+      descKo: '원료 입고부터 제조, 멸균, 포장 전 과정에 걸쳐 글로벌 식품 규격에 부합하는 안전 경영 시스템을 구축했습니다.',
+      descEn: 'Global food safety standard implemented across entire pipeline from raw sourcing to sterile packaging.',
       image: './assets/certifications/iso22000.png',
-      imageEn: './assets/certifications/iso22000_en.png'
+      imageEn: './assets/certifications/iso22000_en.png',
+      logo: './assets/cert_logos/iso22000_logo.svg'
     },
     {
       code: 'HACCP',
       titleKo: 'HACCP 위해요소 중점관리',
       titleEn: 'Hazard Analysis Critical Control Point',
-      descKo: '제조 공정상 발생할 수 있는 위해요소를 사전 차단하여 안전한 사료와 간식을 생산합니다.',
-      descEn: 'Rigorous monitoring and prevention of biological, chemical, and physical hazards.',
+      descKo: '식품 위해요소를 과학적·체계적으로 사전 분석 및 통제하여 반려동물이 안심하고 먹을 수 있는 제품을 생산합니다.',
+      descEn: 'Systematic preventive approach to food safety biological, chemical, and physical hazards.',
       image: './assets/certifications/haccp.png',
-      imageEn: './assets/certifications/haccp_en.png'
+      imageEn: './assets/certifications/haccp_en.png',
+      logo: './assets/cert_logos/haccp_logo.svg'
     },
     {
       code: 'AAFCO',
-      titleKo: 'AAFCO 미국사료관리협회 영양기준',
-      titleEn: 'AAFCO Nutritional Guidelines Compliant',
-      descKo: '미국사료관리협회(AAFCO)의 개·고양이 필수 영양 가이드라인을 준수합니다.',
-      descEn: 'Formulated to meet global AAFCO nutritional standards for dogs and cats.',
-      image: null
+      titleKo: '미국사료관리협회 영양기준 준수',
+      titleEn: 'AAFCO Nutritional Guidelines',
+      descKo: '글로벌 표준인 미국사료관리협회(AAFCO)의 엄격한 반려견·반려묘 필수 영양소 가이드라인을 100% 충족합니다.',
+      descEn: 'Formulated in full compliance with rigorous global nutritional requirements of AAFCO.',
+      image: null,
+      logo: './assets/cert_logos/aafco_logo.svg'
     }
   ];
 
-  // Patents / design registrations / utility model. The certificates
-  // themselves only exist in Korean (KIPO issues no separate English
-  // copy) but already carry the official bilingual boilerplate; the
-  // titleEn below is our own translation of the specific invention
-  // title shown as a caption under the image, not a fabricated document.
+  // 특허 및 지식재산권 데이터
   const patents = [
     {
-      type: 'patent',
       typeKo: '특허',
       typeEn: 'Patent',
       no: '10-2252390',
@@ -70,7 +120,6 @@ export default function Trust() {
       image: './assets/patents/patent_2252390.jpg'
     },
     {
-      type: 'patent',
       typeKo: '특허',
       typeEn: 'Patent',
       no: '10-2042458',
@@ -79,7 +128,6 @@ export default function Trust() {
       image: './assets/patents/patent_2042458.jpg'
     },
     {
-      type: 'patent',
       typeKo: '특허',
       typeEn: 'Patent',
       no: '10-2042457',
@@ -88,7 +136,6 @@ export default function Trust() {
       image: './assets/patents/patent_2042457.jpg'
     },
     {
-      type: 'patent',
       typeKo: '특허',
       typeEn: 'Patent',
       no: '10-2248006',
@@ -97,7 +144,6 @@ export default function Trust() {
       image: './assets/patents/patent_2248006.jpg'
     },
     {
-      type: 'patent',
       typeKo: '특허',
       typeEn: 'Patent',
       no: '10-2233264',
@@ -106,7 +152,6 @@ export default function Trust() {
       image: './assets/patents/patent_2233264.jpg'
     },
     {
-      type: 'patent',
       typeKo: '특허',
       typeEn: 'Patent',
       no: '10-2254626',
@@ -115,7 +160,6 @@ export default function Trust() {
       image: './assets/patents/patent_2254626.jpg'
     },
     {
-      type: 'patent',
       typeKo: '특허',
       typeEn: 'Patent',
       no: '10-2246000',
@@ -124,7 +168,6 @@ export default function Trust() {
       image: './assets/patents/patent_2246000.jpg'
     },
     {
-      type: 'patent',
       typeKo: '특허',
       typeEn: 'Patent',
       no: '10-2956733',
@@ -133,7 +176,6 @@ export default function Trust() {
       image: './assets/patents/patent_2956733.jpg'
     },
     {
-      type: 'design',
       typeKo: '디자인등록',
       typeEn: 'Design Registration',
       no: '30-0833217',
@@ -142,45 +184,43 @@ export default function Trust() {
       image: './assets/patents/design_0833217.png'
     },
     {
-      type: 'design',
       typeKo: '디자인등록',
       typeEn: 'Design Registration',
       no: '30-0847166',
       titleKo: '애완동물용 목줄',
       titleEn: 'Pet Leash',
       image: './assets/patents/design_0847166.png'
-    },
+    }
   ];
 
-  // 박람회 연도별 대표 제목/설명 (data/expo.js의 사진들을 연도로 묶을 때 사용)
+  // 박람회 연도별 대표 제목/설명 (중복 년도 제거)
   const expoYearMeta = {
     '2019': {
-      labelKo: '2019 미국 올랜도 글로벌 펫 엑스포',
-      labelEn: '2019 Global Pet Expo, Orlando',
-      descKo: '미국 올랜도 글로벌 펫 엑스포 참가 현장',
-      descEn: "Boomyung's booth at Global Pet Expo, Orlando, USA."
+      labelKo: '미국 올랜도 글로벌 펫 엑스포',
+      labelEn: 'Global Pet Expo, Orlando',
+      descKo: '세계 최대 규모의 미국 올랜도 글로벌 펫 엑스포 참가 현장',
+      descEn: "Boomyung's international booth at Global Pet Expo, Orlando, USA."
     },
     '2023': {
-      labelKo: '2023 태국 국제 펫 박람회 현장 갤러리',
-      labelEn: '2023 Pet Fair South East Asia',
-      descKo: '방콕 현지 부명 브랜드 전시 및 상담 현장',
-      descEn: "Showcasing Boomyung's premium brands to global buyers in Bangkok."
+      labelKo: '태국 국제 펫 박람회 (Pet Fair SEA)',
+      labelEn: 'Pet Fair South East Asia',
+      descKo: '방콕 현지 부명 브랜드 단독 부스 및 동남아 바이어 수출 상담',
+      descEn: "Showcasing Boomyung's premium brands to global distributors in Bangkok."
     },
     '2024': {
-      labelKo: '2024 태국 국제 펫 박람회 현장 갤러리',
-      labelEn: '2024 Pet Fair South East Asia',
-      descKo: '방콕 현지 부명 브랜드 전시 및 상담 현장',
-      descEn: "Showcasing Boomyung's premium brands to global buyers in Bangkok."
+      labelKo: '태국 국제 펫 박람회 (Pet Fair SEA)',
+      labelEn: 'Pet Fair South East Asia',
+      descKo: '혁신적인 K-펫푸드 라인업 전시 및 글로벌 파트너십 확대',
+      descEn: "Expanding international distribution network with innovative K-Pet products."
     },
     '2025': {
-      labelKo: '2025 태국 국제 펫 박람회 현장 갤러리',
-      labelEn: '2025 Pet Fair South East Asia',
-      descKo: '방콕 현지 부명 브랜드 전시 및 상담 현장',
-      descEn: "Showcasing Boomyung's premium brands to global buyers in Bangkok."
+      labelKo: '태국 국제 펫 박람회 (Pet Fair SEA)',
+      labelEn: 'Pet Fair South East Asia',
+      descKo: '지속 가능한 펫 케어 솔루션 글로벌 공개 및 상담 현장',
+      descEn: "Presenting sustainable pet care solutions to international partners."
     }
   };
 
-  // expoPhotos(전체 사진 목록)를 연도별 그룹으로 재구성 (연도마다 하나의 섹션을 렌더링하기 위함)
   const expoYearGroups = [];
   expoPhotos.forEach((photo, index) => {
     const meta = expoYearMeta[photo.year] || { labelKo: photo.year, labelEn: photo.year, descKo: '', descEn: '' };
@@ -192,15 +232,7 @@ export default function Trust() {
     group.items.push({ photo, index });
   });
 
-  // 박람회 사진 확대보기(라이트박스) 열기/닫기/이전-다음 이동 함수들
-  const openLightbox = (index) => {
-    setSelectedPhotoIndex(index);
-  };
-
-  const closeLightbox = () => {
-    setSelectedPhotoIndex(null);
-  };
-
+  // 라이트박스 네비게이션
   const nextPhoto = (e) => {
     e.stopPropagation();
     if (selectedPhotoIndex !== null) {
@@ -216,318 +248,300 @@ export default function Trust() {
   };
 
   return (
-    <div className="daesang-sub-page">
-      {/* SECTION: 페이지 상단 히어로 배너 (제목/부제) */}
-      <section className="daesang-sub-hero" style={{ backgroundImage: "url('./assets/trust_hero.png')" }}>
-        <div className="daesang-section-overlay"></div>
-        <div className="daesang-sub-hero-content">
-          <span className="daesang-poetic-sub">QUALITY & GLOBAL TRUST</span>
-          <h1>{isEn ? 'Trust & Certification' : '신뢰와 인증'}</h1>
-          <p>{isEn ? 'Uncompromising safety protocols & international exhibition records.' : '엄격한 품질 표준과 글로벌 박람회 출품을 통해 신뢰를 실증합니다.'}</p>
+    <div className="bm-trust-page">
+      {/* ====== 1. 서브 히어로 (Sub Hero) ====== */}
+      <section
+        className="bm-sub-hero"
+        style={{
+          backgroundImage: "url('./assets/trust_hero.png')"
+        }}
+      >
+        <div className="bm-sub-hero-overlay" />
+        <div className="bm-sub-hero-content animate-on-scroll fade-up is-visible">
+          <span className="bm-sub-hero-tag">GLOBAL STANDARDS & VERIFIED QUALITY</span>
+          <h1 className="bm-sub-hero-title">
+            {isEn ? 'Trust & Certification' : '신뢰와 인증'}
+          </h1>
+          <p className="bm-sub-hero-desc">
+            {isEn
+              ? 'International safety standards, proprietary patented technologies, and proven global exhibitions.'
+              : '국제 표준 품질 인증 시스템과 독자적 특허 기술력, 세계 유수 박람회 출품을 통해 부명의 정직한 신뢰를 입증합니다.'}
+          </p>
         </div>
       </section>
 
-      {/* SECTION: 인증서 카드 그리드 (클릭 시 인증서 이미지 팝업) */}
-      <section className="daesang-white-section">
-        <div className="daesang-container-wide">
-          <span className="daesang-brand-num">CERTIFICATIONS</span>
-          <h2 className="daesang-section-h2">{isEn ? 'Quality Management System' : '품질 및 안전 인증 시스템'}</h2>
+      <div className="bm-container" style={{ paddingTop: '60px' }}>
+        {/* ====== 2. 품질 및 안전 인증 시스템 섹션 ====== */}
+        <section id="certs" style={{ marginBottom: '88px' }}>
+          <div className="bm-trust-section-head">
+            <div>
+              <span className="bm-trust-tag">GLOBAL STANDARDS</span>
+              <h2 className="bm-trust-title">{isEn ? 'Quality Management Systems' : '국제 공인 품질 및 안전 인증'}</h2>
+            </div>
+            <p className="bm-trust-desc">
+              {isEn
+                ? 'Certified management systems ensuring uncompromising food safety, hygiene, and eco-friendly standards.'
+                : '식품 안전, 위생, 환경 기준을 준수하며 철저한 품질 관리 시스템을 바탕으로 생산합니다.'}
+            </p>
+          </div>
 
-          <div className="daesang-trust-grid">
+          <div className="bm-cert-grid">
             {certifications.map(cert => {
               const hasImage = !!cert.image;
               return (
                 <div
                   key={cert.code}
-                  className="daesang-trust-card"
+                  className={`bm-cert-card ${hasImage ? 'clickable' : ''}`}
                   onClick={hasImage ? () => setSelectedCert(cert) : undefined}
-                  style={hasImage ? { cursor: 'pointer' } : undefined}
-                  title={hasImage ? (isEn ? 'Click to view certificate' : '클릭하면 인증서를 볼 수 있습니다') : undefined}
                 >
-                  <span className="trust-code">{cert.code}</span>
-                  <h3>{isEn ? cert.titleEn : cert.titleKo}</h3>
-                  <p>{isEn ? cert.descEn : cert.descKo}</p>
+                  <div className="bm-cert-badge-wrap">
+                    <span className="bm-cert-code">{cert.code}</span>
+                    <div className={`bm-cert-logo-badge ${cert.code === 'AAFCO' ? 'aafco' : ''}`}>
+                      {certLogoMap[cert.code] && (
+                        <img src={certLogoMap[cert.code]} alt={cert.code} />
+                      )}
+                    </div>
+                  </div>
+                  <h3 className="bm-cert-card-title">{isEn ? cert.titleEn : cert.titleKo}</h3>
+                  <p className="bm-cert-card-desc">{isEn ? cert.descEn : cert.descKo}</p>
                 </div>
               );
             })}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* SECTION: 보유 특허/디자인등록 그리드 (클릭 시 증서 이미지 팝업) */}
-      <section className="daesang-white-section" style={{ background: '#F8F9FA', borderTop: '1px solid #EAEAEA' }}>
-        <div className="daesang-container-wide">
-          <span className="daesang-brand-num">INTELLECTUAL PROPERTY</span>
-          <h2 className="daesang-section-h2">{isEn ? 'Patents Held' : '보유 특허'}</h2>
-          <p style={{ color: '#666', fontSize: '0.9rem', marginTop: '-8px', marginBottom: '20px' }}>
-            {isEn
-              ? 'BOOMYUNG holds patents, design registrations, and a utility model covering our pet food and accessory technologies, registered with the Korean Intellectual Property Office (KIPO).'
-              : '(주)부명은 반려동물 사료 및 용품 관련 기술에 대해 특허청(KIPO)에 등록된 특허, 디자인등록, 실용신안을 보유하고 있습니다.'}
-          </p>
+        {/* ====== 3. 보유 특허 및 지식재산권 섹션 ====== */}
+        <section id="patents" style={{ marginBottom: '80px' }}>
+          <div className="bm-trust-section-head">
+            <div>
+              <span className="bm-trust-tag">INTELLECTUAL PROPERTY</span>
+              <h2 className="bm-trust-title">{isEn ? 'Patents & Registrations' : '독자적 특허 및 지식재산권'}</h2>
+            </div>
+            <p className="bm-trust-desc">
+              {isEn
+                ? 'Proprietary manufacturing formulations, cat litter processing, and pet ergonomic design patents registered with KIPO.'
+                : '특허청(KIPO)에 정식 등록된 원료 코팅 배합, 벤토나이트·두부모래 제조, 반려용품 디자인 특허를 보유하고 있습니다.'}
+            </p>
+          </div>
 
-          <div className="patents-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '14px' }}>
+          <div className="bm-patent-grid">
             {patents.map(p => (
               <div
                 key={p.no}
+                className="bm-patent-card"
                 onClick={() => setSelectedPatent(p)}
-                style={{
-                  background: '#FFFFFF',
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '8px',
-                  overflow: 'hidden',
-                  cursor: 'pointer',
-                  transition: 'box-shadow 0.2s ease, transform 0.2s ease',
-                  aspectRatio: '210 / 297',
-                  display: 'flex',
-                  flexDirection: 'column'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.1)';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = 'none';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
+                title={isEn ? 'Click to view patent certificate' : '클릭하면 특허증을 크게 볼 수 있습니다'}
               >
-                <div style={{ flex: 1, minHeight: 0, background: '#F3F4F6', overflow: 'hidden' }}>
-                  <img src={p.image} alt={p.titleKo} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
+                <div className="bm-patent-preview-wrap">
+                  <img src={p.image} alt={p.titleKo} loading="lazy" />
                 </div>
-                <div style={{ padding: '8px 10px', flexShrink: 0 }}>
-                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--dh-blue)', letterSpacing: '0.02em' }}>
-                    {isEn ? p.typeEn : p.typeKo} {p.no}
-                  </span>
-                  <p style={{
-                    fontSize: '0.75rem', color: '#374151', margin: '3px 0 0',
-                    display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
-                  }}>
-                    {isEn ? p.titleEn : p.titleKo}
-                  </p>
+                <div className="bm-patent-body">
+                  <span className="bm-patent-badge">{isEn ? p.typeEn : p.typeKo}</span>
+                  <h4 className="bm-patent-title">{isEn ? p.titleEn : p.titleKo}</h4>
+                  <span className="bm-patent-no">No. {p.no}</span>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* SECTION: 연도별 해외 박람회 참가 사진 갤러리 (연도마다 하나의 섹션으로 반복 렌더링) */}
-      {expoYearGroups.map(({ year, labelKo, labelEn, descKo, descEn, items }, groupIdx) => (
-        <section
-          key={year}
-          className="daesang-white-section"
-          style={{
-            borderTop: '1px solid #EAEAEA',
-            background: groupIdx % 2 === 1 ? '#F8F9FA' : undefined
-          }}
-        >
-          <div className="daesang-container-wide">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '30px', flexWrap: 'wrap', gap: '16px' }}>
-              <div>
-                <span className="daesang-brand-num">GLOBAL EXHIBITION</span>
-                <h2 className="daesang-section-h2" style={{ marginBottom: '8px' }}>
-                  {isEn ? labelEn : labelKo}
-                </h2>
-                <p style={{ color: '#666', fontSize: '0.95rem' }}>
-                  {isEn ? descEn : descKo}
-                </p>
+        {/* ====== 4. 글로벌 박람회 갤러리 섹션 ====== */}
+        <section id="expos" className="bm-expo-showcase-section">
+          <div className="bm-trust-section-head">
+            <div>
+              <span className="bm-trust-tag">GLOBAL EXHIBITION</span>
+              <h2 className="bm-trust-title">{isEn ? 'Global Exhibitions & Fairs' : '세계 펫 박람회 출품 현장'}</h2>
+            </div>
+            <p className="bm-trust-desc">
+              {isEn
+                ? 'Showcasing Boomyung’s premium pet healthcare products on international stages and building global buyer trust.'
+                : '미국 올랜도, 방콕 등 전 세계 주요 펫 엑스포에 지속 참가하여 글로벌 바이어와 파트너십을 확장해 나가고 있습니다.'}
+            </p>
+          </div>
+
+          {expoYearGroups.map(({ year, labelKo, labelEn, descKo, descEn, items }) => (
+            <div key={year} className="bm-expo-year-card">
+              <div className="bm-expo-year-header">
+                <div className="bm-expo-year-badge">
+                  {year} <span>{isEn ? labelEn : labelKo}</span>
+                </div>
+                <span className="bm-expo-year-desc">{isEn ? descEn : descKo}</span>
+              </div>
+
+              <div className="bm-expo-grid">
+                {items.map(({ photo, index }) => (
+                  <div
+                    key={photo.id}
+                    className="bm-expo-card"
+                    onClick={() => setSelectedPhotoIndex(index)}
+                  >
+                    <img src={photo.image} alt={isEn ? photo.titleEn : photo.titleKo} loading="lazy" />
+                    <div className="bm-expo-card-overlay">
+                      <span className="bm-expo-card-loc">{isEn ? photo.locationEn : photo.locationKo}</span>
+                      <span className="bm-expo-card-title">{isEn ? photo.titleEn : photo.titleKo}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
+          ))}
+        </section>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px' }}>
-              {items.map(({ photo, index }) => (
-                <div
-                  key={photo.id}
-                  onClick={() => openLightbox(index)}
-                  style={{
-                    position: 'relative',
-                    borderRadius: '8px',
-                    overflow: 'hidden',
-                    cursor: 'pointer',
-                    height: '180px',
-                    background: '#EAEAEA',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                    transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.03)';
-                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)';
-                  }}
-                >
-                  <img
-                    src={photo.image}
-                    alt={isEn ? photo.titleEn : photo.titleKo}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                  <div style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.7) 100%)',
-                    display: 'flex',
-                    alignItems: 'flex-end',
-                    padding: '10px 12px'
-                  }}>
-                    <span style={{ color: '#FFF', fontSize: '0.78rem', opacity: 0.9 }}>
-                      {isEn ? photo.locationEn : photo.locationKo}
-                    </span>
+        {/* ====== 7. 유통 네트워크 및 파트너사 로고 벽 ====== */}
+        <section id="partners" style={{ marginBottom: '100px' }}>
+          <div className="bm-trust-section-head">
+            <div>
+              <span className="bm-trust-tag">DISTRIBUTION NETWORK</span>
+              <h2 className="bm-trust-title">{isEn ? 'Major Retail & Pet Specialty Partners' : '국내 대형 유통 네트워크 & 파트너사'}</h2>
+            </div>
+            <p className="bm-trust-desc">
+              {isEn
+                ? 'Supplying premium verified pet products to nationwide hypermarkets, convenience stores, and specialized pet networks.'
+                : '이마트, 홈플러스, 롯데마트, 주요 편의점 및 펫 전문 유통망을 통해 대한민국 어디서나 부명의 제품을 만나실 수 있습니다.'}
+            </p>
+          </div>
+
+          {/* 대형마트 & 이커머스 파트너 */}
+          <div style={{ marginBottom: '40px' }}>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--bm-text-dark)', marginBottom: '16px' }}>
+              {isEn ? 'Major Retail & E-Commerce' : '대형마트 및 주요 온·오프라인 유통망'}
+            </h3>
+            <div className="bm-trust-partners-grid">
+              {partners.map(p => (
+                <div key={p.id} className="bm-trust-partner-box">
+                  <div className="bm-trust-partner-img-wrap">
+                    <img src={p.logo} alt={p.nameKo} loading="lazy" />
                   </div>
+                  <span className="bm-trust-partner-name">{isEn ? p.nameEn : p.nameKo}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 반려동물 전문 유통사 파트너 */}
+          <div>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--bm-text-dark)', marginBottom: '16px' }}>
+              {isEn ? 'Pet Specialty Distributors' : '국내 대표 펫 전문 유통 파트너사'}
+            </h3>
+            <div className="bm-trust-partners-grid">
+              {petRetailPartners.map(p => (
+                <div key={p.id} className="bm-trust-partner-box">
+                  {p.logo ? (
+                    <>
+                      <div className="bm-trust-partner-img-wrap">
+                        <img src={p.logo} alt={p.nameKo} loading="lazy" />
+                      </div>
+                      <span className="bm-trust-partner-name">{isEn ? p.nameEn : p.nameKo}</span>
+                    </>
+                  ) : (
+                    <span style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: 600 }}>
+                      {isEn ? p.nameEn : p.nameKo}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
           </div>
         </section>
-      ))}
+      </div>
 
-      {/* SECTION: 대형 유통 파트너사(마트/편의점 등) 로고 벽 */}
-      <section className="daesang-white-section" style={{ background: expoYearGroups.length % 2 === 1 ? '#F8F9FA' : undefined, borderTop: '1px solid #EAEAEA' }}>
-        <div className="daesang-container-wide">
-          <span className="daesang-brand-num">PARTNERSHIP</span>
-          <h2 className="daesang-section-h2">{isEn ? 'Domestic Distribution Network' : '신뢰로 인정받은 국내 대형 유통 네트워크'}</h2>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '20px', marginTop: '30px' }}>
-            {partners.map(p => (
-              <div
-                key={p.id}
-                style={{
-                  background: '#FFFFFF',
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '10px',
-                  padding: '10px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                  height: '110px',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
-                }}
-              >
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-                  <img src={p.logo} alt={p.nameKo} style={{ maxHeight: '70px', maxWidth: '100%', objectFit: 'contain' }} />
-                </div>
-                <span style={{ fontSize: '0.82rem', color: '#666', marginTop: '4px', fontWeight: 500 }}>
-                  {isEn ? p.nameEn : p.nameKo}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION: 반려동물 전문 유통사 로고 벽 */}
-      <section className="daesang-white-section" style={{ background: expoYearGroups.length % 2 === 0 ? '#F8F9FA' : undefined, borderTop: '1px solid #EAEAEA' }}>
-        <div className="daesang-container-wide">
-          <span className="daesang-brand-num">PARTNERSHIP</span>
-          <h2 className="daesang-section-h2">{isEn ? 'Domestic Pet Specialty Distributors' : '부명과 함께 하는 국내 펫 전문 유통사'}</h2>
-          <p style={{ color: 'var(--dh-text-muted)', fontSize: '0.85rem', marginTop: '-16px', marginBottom: '20px', wordBreak: 'keep-all' }}>
-            {isEn
-              ? 'Supplying verified products to major domestic pet specialty distribution channels including THEKICO, SUJINPET, Dog & Cat Paradise, and WellPet Company.'
-              : '선진펫, 꼬기오, 야옹아멍멍해봐, 더 키코 등 국내 대형 펫 유통 채널에 검증된 제품을 공급합니다.'}
-          </p>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '20px' }} className="pet-retail-grid">
-            {petRetailPartners.map(p => (
-              <div
-                key={p.id}
-                style={{
-                  background: p.logo ? '#FFFFFF' : '#FAFAFA',
-                  border: p.logo ? '1px solid #E5E7EB' : '1px dashed #E5E7EB',
-                  borderRadius: '10px',
-                  padding: '10px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: p.logo ? 'flex-start' : 'center',
-                  height: '110px',
-                  boxShadow: p.logo ? '0 2px 6px rgba(0,0,0,0.02)' : undefined
-                }}
-              >
-                {p.logo ? (
-                  <>
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-                      <img src={p.logo} alt={p.nameKo} style={{ maxHeight: '45px', maxWidth: '90px', objectFit: 'contain' }} />
-                    </div>
-                    <span style={{ fontSize: '0.82rem', color: '#666', marginTop: '4px', fontWeight: 500 }}>
-                      {isEn ? p.nameEn : p.nameKo}
-                    </span>
-                  </>
-                ) : (
-                  <span style={{ fontSize: '0.72rem', color: '#CBD5E1', fontWeight: 600 }}>
-                    {isEn ? 'Coming Soon' : '로고 추가 예정'}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION: 인증서 확대 팝업 */}
+      {/* ====== 8. 품질 인증서 모달 팝업 ====== */}
       {selectedCert !== null && (
-        <div className="modal-backdrop" onClick={() => setSelectedCert(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close-btn" onClick={() => setSelectedCert(null)}>&times;</button>
-            <img
-              src={isEn ? selectedCert.imageEn : selectedCert.image}
-              alt={isEn ? selectedCert.titleEn : selectedCert.titleKo}
-            />
-            <div className="modal-caption">
+        <div className="bm-lightbox-overlay" onClick={() => setSelectedCert(null)}>
+          <div className="bm-lightbox-box cert-doc-modal" onClick={e => e.stopPropagation()}>
+            <button
+              className="bm-modal-close-btn"
+              onClick={() => setSelectedCert(null)}
+              style={{ position: 'absolute', top: '14px', right: '14px', zIndex: 10 }}
+            >
+              ✕
+            </button>
+            <div className="bm-lightbox-media-stage">
+              <img
+                src={isEn ? selectedCert.imageEn : selectedCert.image}
+                alt={isEn ? selectedCert.titleEn : selectedCert.titleKo}
+              />
+            </div>
+            <div className="bm-lightbox-footer">
               <div>
-                <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 500 }}>
+                <h4 style={{ color: '#FFFFFF', margin: 0, fontSize: '1.05rem', fontWeight: 800 }}>
                   {selectedCert.code} — {isEn ? selectedCert.titleEn : selectedCert.titleKo}
                 </h4>
+                <p style={{ color: '#94A3B8', margin: '4px 0 0', fontSize: '0.84rem' }}>
+                  {isEn ? selectedCert.descEn : selectedCert.descKo}
+                </p>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* SECTION: 특허/디자인등록 증서 확대 팝업 */}
+      {/* ====== 9. 특허증 모달 팝업 ====== */}
       {selectedPatent !== null && (
-        <div className="modal-backdrop" onClick={() => setSelectedPatent(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close-btn" onClick={() => setSelectedPatent(null)}>&times;</button>
-            <img src={selectedPatent.image} alt={selectedPatent.titleKo} />
-            <div className="modal-caption" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
-              <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 500 }}>
-                {(isEn ? selectedPatent.typeEn : selectedPatent.typeKo)} {selectedPatent.no}
-              </h4>
-              <span style={{ fontSize: '0.9rem', color: '#CBD5E1' }}>
-                {isEn ? selectedPatent.titleEn : selectedPatent.titleKo}
-              </span>
-              {isEn && (
-                <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
-                  Original certificate issued in Korean by the Korean Intellectual Property Office (KIPO); title translated above for reference.
-                </span>
-              )}
+        <div className="bm-lightbox-overlay" onClick={() => setSelectedPatent(null)}>
+          <div className="bm-lightbox-box cert-doc-modal" onClick={e => e.stopPropagation()}>
+            <button
+              className="bm-modal-close-btn"
+              onClick={() => setSelectedPatent(null)}
+              style={{ position: 'absolute', top: '14px', right: '14px', zIndex: 10 }}
+            >
+              ✕
+            </button>
+            <div className="bm-lightbox-media-stage">
+              <img src={selectedPatent.image} alt={selectedPatent.titleKo} />
+            </div>
+            <div className="bm-lightbox-footer">
+              <div>
+                <h4 style={{ color: '#FFFFFF', margin: 0, fontSize: '1.05rem', fontWeight: 800 }}>
+                  {isEn ? selectedPatent.typeEn : selectedPatent.typeKo} (No. {selectedPatent.no})
+                </h4>
+                <p style={{ color: '#67E8F9', margin: '4px 0 0', fontSize: '0.88rem', fontWeight: 600 }}>
+                  {isEn ? selectedPatent.titleEn : selectedPatent.titleKo}
+                </p>
+                {isEn && (
+                  <p style={{ color: '#94A3B8', margin: '4px 0 0', fontSize: '0.76rem' }}>
+                    Official certificate issued by the Korean Intellectual Property Office (KIPO).
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* SECTION: 박람회 사진 확대(라이트박스) 팝업 - 이전/다음 이동 가능 */}
+      {/* ====== 10. 박람회 라이트박스 팝업 (이전/다음 탐색) ====== */}
       {selectedPhotoIndex !== null && (
-        <div className="modal-backdrop" onClick={closeLightbox}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close-btn" onClick={closeLightbox}>&times;</button>
-            <img 
-              src={expoPhotos[selectedPhotoIndex].image} 
-              alt={expoPhotos[selectedPhotoIndex].titleKo} 
-            />
-            <div className="modal-caption">
+        <div className="bm-lightbox-overlay" onClick={() => setSelectedPhotoIndex(null)}>
+          <div className="bm-lightbox-box" onClick={e => e.stopPropagation()}>
+            <button
+              className="bm-modal-close-btn"
+              onClick={() => setSelectedPhotoIndex(null)}
+              style={{ position: 'absolute', top: '16px', right: '16px' }}
+            >
+              ✕
+            </button>
+            <div className="bm-lightbox-media-stage">
+              <img
+                src={expoPhotos[selectedPhotoIndex].image}
+                alt={expoPhotos[selectedPhotoIndex].titleKo}
+              />
+            </div>
+            <div className="bm-lightbox-footer">
               <div>
-                <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 500 }}>
+                <h4 style={{ color: '#FFFFFF', margin: 0, fontSize: '1.05rem', fontWeight: 800 }}>
                   {isEn ? expoPhotos[selectedPhotoIndex].titleEn : expoPhotos[selectedPhotoIndex].titleKo}
                 </h4>
-                <span style={{ fontSize: '0.85rem', color: '#AAA' }}>
+                <span style={{ color: '#67E8F9', fontSize: '0.84rem', fontWeight: 600 }}>
                   {isEn ? expoPhotos[selectedPhotoIndex].locationEn : expoPhotos[selectedPhotoIndex].locationKo} ({selectedPhotoIndex + 1} / {expoPhotos.length})
                 </span>
               </div>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button className="modal-nav-btn" onClick={prevPhoto}>&larr; {isEn ? 'Prev' : '이전'}</button>
-                <button className="modal-nav-btn" onClick={nextPhoto}>{isEn ? 'Next' : '다음'} &rarr;</button>
+              <div className="bm-lightbox-nav-btns">
+                <button className="bm-lightbox-nav-btn" onClick={prevPhoto}>
+                  ← {isEn ? 'Prev' : '이전'}
+                </button>
+                <button className="bm-lightbox-nav-btn" onClick={nextPhoto}>
+                  {isEn ? 'Next' : '다음'} →
+                </button>
               </div>
             </div>
           </div>

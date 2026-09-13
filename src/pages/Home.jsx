@@ -1,326 +1,558 @@
-// 이 파일은 홈(메인) 페이지입니다 (주소: /).
-// 상단 이미지 슬라이더, 브랜드 소개, 브랜드 라인업, 유통 파트너사 마퀴(무한 슬라이드),
-// 그리고 하단 B2B 문의 유도 배너로 구성됩니다.
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useData } from '../context/DataContext';
 import { partners } from '../data/partners';
 import { petRetailPartners } from '../data/petRetailPartners';
+import { products } from '../data/products';
+import { useScrollAnimation, useStaggerAnimation } from '../hooks/useScrollAnimation';
+import b2bBuildingImg from '../assets/b2b_building.jpg';
 
 export default function Home() {
   const { lang } = useLanguage();
   const isEn = lang === 'en';
-  const { siteSettings, brands } = useData(); // 관리자 페이지 "사이트 설정" 탭에서 등록한 히어로 이미지 목록/비전 섹션 배경 이미지, 브랜드 목록
-  const [currentSlide, setCurrentSlide] = useState(0); // 현재 보여지는 히어로 슬라이드 번호
+  const { brands } = useData();
 
-  // 히어로 슬라이드 5장은 전부 같은 문구를 공유하고 사진만 다름 — 관리자가 등록한 이미지 목록(siteSettings.heroImages)으로
-  // 이 공통 문구를 감싸서 슬라이드 배열을 만든다. 이미지 추가/삭제는 관리자 페이지에서만 가능.
-  const heroSlides = siteSettings.heroImages.map((image) => ({
-    subTitle: "Respect for Pet Life",
-    titleKo: "존중은 아주 작고 사소한 것에서부터 시작됩니다",
-    titleEn: "Respect begins with small and thoughtful care.",
-    descKo: "(주)부명은 반려동물의 생명과 건강을 존중하는 정직한 품질로 펫 헬스케어의 미래를 열어갑니다.",
-    descEn: "(주)BOOMYUNG creates a healthier future for pets through uncompromised quality and transparent craftsmanship.",
-    link: "/about",
-    linkTextKo: "기업 소개 자세히 보기",
-    linkTextEn: "MORE ABOUT BOOMYUNG",
-    image
-  }));
+  const ownBrands = brands.filter(b => b.type === 'own');
+  const importedBrands = brands.filter(b => b.type === 'imported');
 
-  // 히어로 슬라이드 자동 전환 타이머 (5초마다 다음 슬라이드로) - 관리자가 이미지를 전부 지운 경우(0장)에는 실행하지 않음
+  // 전체 상품 리스트에서 6개 제품 랜덤 선택 (우측 3열 x 2행 바둑판 그리드)
+  const featuredProducts = useMemo(() => {
+    if (!products || products.length === 0) return [];
+    const shuffled = [...products].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 6);
+  }, []);
+
+  // 히어로 타이틀 타이핑 효과
+  const fullHeroTitle = isEn
+    ? 'Respect begins with small and thoughtful care.'
+    : '존중은 아주 작고\n사소한 것에서부터\n시작됩니다';
+
+  const [typedTitle, setTypedTitle] = useState('');
+  const [isTypingComplete, setIsTypingComplete] = useState(false);
+
   useEffect(() => {
-    if (heroSlides.length === 0) return;
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [heroSlides.length]);
+    setTypedTitle('');
+    setIsTypingComplete(false);
+    let index = 0;
+    const typingInterval = setInterval(() => {
+      index++;
+      setTypedTitle(fullHeroTitle.slice(0, index));
+      if (index >= fullHeroTitle.length) {
+        clearInterval(typingInterval);
+        setIsTypingComplete(true);
+      }
+    }, isEn ? 75 : 120);
 
-  // 이전/다음 화살표 버튼 클릭 시 슬라이드 이동
-  const handlePrev = () => {
-    if (heroSlides.length === 0) return;
-    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
-  };
+    return () => clearInterval(typingInterval);
+  }, [fullHeroTitle, isEn]);
 
-  const handleNext = () => {
-    if (heroSlides.length === 0) return;
-    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-  };
+  // Scroll animation refs
+  const infraRow1Ref = useStaggerAnimation({ staggerDelay: 180, threshold: 0.15 });
+  const infraRow2Ref = useStaggerAnimation({ staggerDelay: 180, threshold: 0.15 });
+  const infraRow3Ref = useStaggerAnimation({ staggerDelay: 180, threshold: 0.15 });
+  const infraRow4Ref = useStaggerAnimation({ staggerDelay: 180, threshold: 0.15 });
+  const brandsSectionRef = useStaggerAnimation({ staggerDelay: 120 });
+  const importedSectionRef = useStaggerAnimation({ staggerDelay: 100 });
+  const productsSectionRef = useStaggerAnimation({ staggerDelay: 80 });
+  const marqueeRef = useScrollAnimation();
+  const ctaRef = useScrollAnimation();
 
-  // 파트너사 로고를 두 배로 복제 - 마퀴(가로 무한 슬라이드)가 끊김 없이 반복되도록 함
+  // Partner marquee duplication for infinite scroll
   const marqueePartners = [...partners, ...partners];
   const marqueePetRetailPartners = [...petRetailPartners, ...petRetailPartners];
 
+  // Map brand origins for imported brands
+  const originMap = {
+    ninaottosson: isEn ? 'Sweden' : '스웨덴',
+    dono: isEn ? 'China' : '중국',
+    reflex: isEn ? 'Turkey' : '터키',
+    sulfodene: isEn ? 'USA' : '미국',
+    petstage: isEn ? 'USA' : '미국',
+  };
+
+  // 인프라 섹션 이미지 갤러리 및 비디오 모달 상태
+  const homadImages = [
+    './assets/homad/homad_01.jpg',
+    './assets/homad/homad_02.jpg',
+    './assets/homad/homad_03.jpg',
+    './assets/homad/homad_04.jpg'
+  ];
+  const wellzenImages = [
+    './assets/wellzen/wellzen_01.png',
+    './assets/wellzen/wellzen_02.png'
+  ];
+  const qingdaoImages = [
+    './assets/china/qingdao-factory.jpg',
+    './assets/china/sand_factory_02.jpg'
+  ];
+
+  const [homadSlideIdx, setHomadSlideIdx] = useState(0);
+  const [wellzenSlideIdx, setWellzenSlideIdx] = useState(0);
+  const [qingdaoSlideIdx, setQingdaoSlideIdx] = useState(0);
+
+  // 각 섹션 이미지가 동시에 로테이션되지 않고 순차적으로 전환되도록 인터벌 및 시작 시간 시차 부여
+  useEffect(() => {
+    // 호마드: 4초 주기
+    const homadTimer = setInterval(() => {
+      setHomadSlideIdx(prev => (prev + 1) % homadImages.length);
+    }, 4000);
+
+    // 웰젠: 2초 지연 후 시작하여 호마드와 2초 간격으로 순차 전환되도록 설정
+    let wellzenTimer = null;
+    const startDelay = setTimeout(() => {
+      setWellzenSlideIdx(prev => (prev + 1) % wellzenImages.length);
+      wellzenTimer = setInterval(() => {
+        setWellzenSlideIdx(prev => (prev + 1) % wellzenImages.length);
+      }, 4000);
+    }, 2000);
+
+    // 칭다오 공장: 1초 지연 후 시작하여 3.5초 주기로 슬라이드 전환
+    let qingdaoTimer = null;
+    const qingdaoDelay = setTimeout(() => {
+      setQingdaoSlideIdx(prev => (prev + 1) % qingdaoImages.length);
+      qingdaoTimer = setInterval(() => {
+        setQingdaoSlideIdx(prev => (prev + 1) % qingdaoImages.length);
+      }, 3500);
+    }, 1000);
+
+    return () => {
+      clearInterval(homadTimer);
+      clearTimeout(startDelay);
+      clearTimeout(qingdaoDelay);
+      if (wellzenTimer) clearInterval(wellzenTimer);
+      if (qingdaoTimer) clearInterval(qingdaoTimer);
+    };
+  }, [homadImages.length, wellzenImages.length, qingdaoImages.length]);
+
+  // 라이트박스 및 비디오 모달 상태
+  const [galleryImages, setGalleryImages] = useState(null);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const closeGallery = () => setGalleryImages(null);
+  const prevGalleryImage = () => setGalleryIndex(i => (i - 1 + galleryImages.length) % galleryImages.length);
+  const nextGalleryImage = () => setGalleryIndex(i => (i + 1) % galleryImages.length);
+  const [showLogisticsVideo, setShowLogisticsVideo] = useState(false);
+
   return (
-    <div className="daesang-home-wrap">
-      {/* SECTION 1: 5-IMAGE HERO CAROUSEL (1.5x Height) */}
-      <section className="hero-slider-container" style={{ height: '90vh', minHeight: '850px', position: 'relative', overflow: 'hidden' }}>
-        {heroSlides.map((slide, idx) => (
-          <div
-            key={idx}
-            className={`daesang-section hero-slide ${idx === currentSlide ? 'active' : ''}`}
-            style={{
-              height: '90vh',
-              minHeight: '850px',
-              backgroundImage: `url('${slide.image}')`,
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              opacity: idx === currentSlide ? 1 : 0,
-              visibility: idx === currentSlide ? 'visible' : 'hidden',
-              transition: 'opacity 0.8s ease-in-out, visibility 0.8s ease-in-out',
-              zIndex: idx === currentSlide ? 2 : 1
-            }}
-          >
-            <div className="daesang-section-overlay" style={{ background: 'rgba(0,0,0,0.35)' }}></div>
-            <div className="daesang-section-content" style={{ position: 'relative', zIndex: 3 }}>
-              <span className="daesang-poetic-sub">{slide.subTitle}</span>
-              <h1 className="daesang-poetic-title">
-                {isEn ? slide.titleEn : slide.titleKo}
-              </h1>
-              <p className="daesang-poetic-desc">
-                {isEn ? slide.descEn : slide.descKo}
-              </p>
-              <Link to={slide.link} className="daesang-btn-minimal">
-                {isEn ? slide.linkTextEn : slide.linkTextKo}
-              </Link>
-            </div>
-          </div>
-        ))}
+    <div className="bm-home">
+      {/* 물류센터 팝업 영상 프리로드용 */}
+      <video src="./assets/logistics/logistics.mp4" preload="auto" muted style={{ display: 'none' }} />
 
-        {/* SECTION: 슬라이드 이전/다음 화살표 버튼 */}
-        <button
-          onClick={handlePrev}
-          aria-label="Previous slide"
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '30px',
-            transform: 'translateY(-50%)',
-            zIndex: 10,
-            background: 'rgba(0,0,0,0.3)',
-            border: '1px solid rgba(255,255,255,0.4)',
-            color: '#FFFFFF',
-            width: '48px',
-            height: '48px',
-            borderRadius: '50%',
-            cursor: 'pointer',
-            fontSize: '1.4rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 0.2s ease',
-            backdropFilter: 'blur(4px)'
-          }}
-        >
-          &#10094;
-        </button>
-
-        <button
-          onClick={handleNext}
-          aria-label="Next slide"
-          style={{
-            position: 'absolute',
-            top: '50%',
-            right: '30px',
-            transform: 'translateY(-50%)',
-            zIndex: 10,
-            background: 'rgba(0,0,0,0.3)',
-            border: '1px solid rgba(255,255,255,0.4)',
-            color: '#FFFFFF',
-            width: '48px',
-            height: '48px',
-            borderRadius: '50%',
-            cursor: 'pointer',
-            fontSize: '1.4rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 0.2s ease',
-            backdropFilter: 'blur(4px)'
-          }}
-        >
-          &#10095;
-        </button>
-
-        {/* SECTION: 슬라이드 하단 점(페이지네이션) 인디케이터 */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '35px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 10,
-            display: 'flex',
-            gap: '10px'
-          }}
-        >
-          {heroSlides.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentSlide(idx)}
-              aria-label={`Go to slide ${idx + 1}`}
-              style={{
-                width: idx === currentSlide ? '32px' : '10px',
-                height: '10px',
-                borderRadius: '5px',
-                border: 'none',
-                background: idx === currentSlide ? '#FFFFFF' : 'rgba(255,255,255,0.4)',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}
-            />
-          ))}
+      {/* ====== SECTION 1: 영상 히어로 (풀화면 비디오 + 타이핑 효과) ====== */}
+      <section className="bm-hero">
+        {/* 풀화면 비디오 배경 */}
+        <div className="bm-hero-video-bg">
+          <video autoPlay muted loop playsInline>
+            <source src="./data/dog-treat-fireplace.mp4" type="video/mp4" />
+          </video>
         </div>
 
-        {/* SECTION: 히어로 하단 그라데이션 페이드 - 다음 섹션(비전 배경)과 자연스럽게 이어지도록 투명→검정으로 어두워짐.
-            히어로 이미지가 관리자에 의해 계속 바뀌어도(색감이 매번 다름) 이 페이드 덕분에 항상 안정적으로 자연스러운 전환이 유지됨 */}
-        <div style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          width: '100%',
-          height: '220px',
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.85) 100%)',
-          zIndex: 5,
-          pointerEvents: 'none'
-        }} />
-      </section>
+        {/* 시네마틱 다크 그라데이션 오버레이 */}
+        <div className="bm-hero-overlay" />
 
-      {/* SECTION 2: BRAND VISION (Separate Full Section - 1.5x Height with Dogs & Cats Forest Image) */}
-      <section className="daesang-section" style={{ height: '90vh', minHeight: '850px', backgroundImage: `url('${siteSettings.visionImage}')`, position: 'relative' }}>
-        <div className="daesang-section-overlay" style={{ background: 'rgba(0,0,0,0.35)' }}></div>
-        {/* SECTION: 비전 섹션 상단 그라데이션 페이드 - 히어로 하단 페이드와 맞닿아 두 섹션이 겹치듯 자연스럽게 연결됨 */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '220px',
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)',
-          zIndex: 2,
-          pointerEvents: 'none'
-        }} />
-        <div className="daesang-section-content" style={{ position: 'relative', zIndex: 3 }}>
-          <span className="daesang-poetic-sub">Scientific Precision & Nature</span>
-          <h2 className="daesang-poetic-title">
-            {isEn 
-              ? "Crafted with precision, delivered with unwavering trust." 
-              : "영양과 기술, 그리고 신뢰로 빚어낸 품질"}
-          </h2>
-          <p className="daesang-poetic-desc">
-            {isEn
-              ? "Providing healthier food, treats, and care products for cats and dogs in harmony with nature."
-              : "자연과 함께 숨 쉬는 강아지와 고양이를 위해 정직한 연구와 철저한 위생 관리를 실천합니다."}
-          </p>
-          <Link to="/brands" className="daesang-btn-minimal">
-            {isEn ? 'EXPLORE BRANDS' : '브랜드 포트폴리오'}
-          </Link>
-        </div>
-      </section>
-
-      {/* SECTION 2: BRAND LINEUP (4 Core Brands, Single Row 4-Column Layout) */}
-      <section className="daesang-white-section" style={{ padding: '70px 40px' }}>
-        <div className="daesang-container-wide">
-          <div style={{ marginBottom: '28px' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--dh-blue)', letterSpacing: '0.08em', display: 'block', marginBottom: '6px', textTransform: 'uppercase' }}>
-              Specialized Portfolios
-            </span>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--dh-navy)', marginBottom: '8px', wordBreak: 'keep-all' }}>
-              {isEn ? 'Core Brand Lineup' : '부명이 만들어가는 대표 브랜드 라인업'}
-            </h2>
-            <p style={{ color: 'var(--dh-text-muted)', fontSize: '0.85rem', lineHeight: '1.5', wordBreak: 'keep-all' }}>
+        {/* 비디오 위 텍스트 컨테이너 */}
+        <div className="bm-hero-text-container">
+          <div className="bm-hero-content">
+            <span className="bm-hero-sub">Respect for Pet Life</span>
+            <h1 className="bm-hero-title">
+              {typedTitle.split('\n').map((line, idx, arr) => (
+                <React.Fragment key={idx}>
+                  {line}
+                  {idx < arr.length - 1 && <br />}
+                </React.Fragment>
+              ))}
+              {!isTypingComplete && <span className="bm-typing-cursor" />}
+            </h1>
+            <p className="bm-hero-desc">
               {isEn
-                ? 'Introducing the flagship products for each brand.'
-                : '각 브랜드별 대표 상품을 소개합니다.'}
+                ? 'BOOMYUNG creates a healthier future for pets through uncompromised quality and transparent craftsmanship.'
+                : '(주)부명은 반려동물의 생명과 건강을 존중하는 정직한 품질로 펫 헬스케어의 미래를 열어갑니다.'}
+            </p>
+            <Link to="/brands" className="bm-hero-cta">
+              <span>{isEn ? 'Explore Brands' : '브랜드 포트폴리오'}</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+
+        {/* 스크롤 힌트 */}
+        <div className="bm-hero-scroll-hint">
+          <div className="bm-scroll-dot" />
+          <span>SCROLL</span>
+        </div>
+      </section>
+
+      {/* ====== SECTION: 생산 및 R&D 인프라 (INFRASTRUCTURE) ====== */}
+      <section className="bm-section bm-section-light bm-infra-section">
+        <div className="bm-container">
+          <div className="bm-section-header" style={{ marginBottom: '36px' }}>
+            <span className="bm-section-tag">INFRASTRUCTURE &amp; R&amp;D</span>
+            <h2 className="bm-section-title">
+              {isEn ? 'Production & R&D Infrastructure' : '생산 및 R&D 인프라'}
+            </h2>
+            <p className="bm-section-desc">
+              {isEn
+                ? 'Certified manufacturing facilities, specialized research, and nationwide logistics supporting premium quality.'
+                : '엄격한 품질 인증을 획득한 제조시설과 전문 연구소, 첨단 물류 시스템으로 안전하고 신뢰할 수 있는 제품을 공급합니다.'}
             </p>
           </div>
 
-          <div className="daesang-grid-brands" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginTop: '28px' }}>
-            {brands.map((b, idx) => {
-              const logoHeightMap = { bellbird: 77, howpet: 58, petstages: 58 };
-              const logoHeight = logoHeightMap[b.id] || 64;
-              return (
-              <Link to={`/brands/${b.id}`} key={b.id} className="daesang-brand-item" style={{ textDecoration: 'none', background: '#FFFFFF', padding: '24px', borderRadius: '10px', border: '1px solid var(--dh-border)', transition: 'all 0.2s ease' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', minHeight: '68px' }}>
-                  <span className="daesang-brand-num" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--dh-blue)' }}>0{idx + 1}</span>
-                  {b.logo && (
-                    <img src={b.logo} alt={b.nameKo} style={{ height: `${logoHeight}px`, maxWidth: '200px', objectFit: 'contain', transform: `scale(${b.logoScale || 1})` }} />
-                  )}
-                </div>
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--dh-navy)', marginBottom: '6px' }}>
-                  {isEn ? (b.nameEn || b.nameKo) : b.nameKo}
-                </h3>
-                <p style={{ fontSize: '0.82rem', color: 'var(--dh-text-muted)', lineHeight: '1.5' }}>
-                  {isEn ? b.descriptionEn : b.descriptionKo}
+          <div className="bm-infra-grid">
+            {/* ROW 1: [좌] PET FEED FACTORY | [우] 호마드 공장 이미지 로테이션 */}
+            <div className="bm-infra-row" ref={infraRow1Ref}>
+              <div className="bm-infra-card bm-infra-text-card animate-child slide-left">
+                <span className="bm-infra-code">PET FEED FACTORY</span>
+                <h3 className="bm-infra-title">{isEn ? 'Pet Food & Snack Factory' : '사료 및 식품 제조공장'}</h3>
+                <p className="bm-infra-desc">
+                  {isEn
+                    ? 'Pet food and treats OEM/ODM factory holding ISO 22000 and HACCP certifications.'
+                    : '펫 사료 및 간식 OEM/ODM 공장으로 ISO 22000 및 HACCP 인증을 보유하고 있습니다.'}
                 </p>
-              </Link>
-              );
-            })}
+                <div className="bm-infra-tags">
+                  <span className="bm-infra-tag bm-tag-blue">ISO 22000</span>
+                  <span className="bm-infra-tag bm-tag-blue">HACCP</span>
+                </div>
+              </div>
+
+              <div
+                className="bm-infra-card bm-infra-media-card animate-child slide-right"
+                onClick={() => { setGalleryImages(homadImages); setGalleryIndex(homadSlideIdx); }}
+                title={isEn ? 'Click to view gallery' : '클릭하여 사진 크게보기'}
+              >
+                {homadImages.map((src, idx) => (
+                  <img
+                    key={src}
+                    src={src}
+                    alt={`Homad Factory ${idx + 1}`}
+                    className={`bm-infra-slide-img ${idx === homadSlideIdx ? 'active' : ''}`}
+                  />
+                ))}
+                <div className="bm-infra-slide-indicators">
+                  {homadImages.map((_, idx) => (
+                    <span
+                      key={idx}
+                      className={`bm-infra-indicator ${idx === homadSlideIdx ? 'active' : ''}`}
+                      onClick={(e) => { e.stopPropagation(); setHomadSlideIdx(idx); }}
+                    />
+                  ))}
+                </div>
+                <div className="bm-infra-zoom-hint">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    <line x1="11" y1="8" x2="11" y2="14" />
+                    <line x1="8" y1="11" x2="14" y2="11" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {/* ROW 2: [좌] 웰젠 R&D 이미지 로테이션 | [우] R&D CENTER */}
+            <div className="bm-infra-row" ref={infraRow2Ref}>
+              <div
+                className="bm-infra-card bm-infra-media-card animate-child slide-left"
+                onClick={() => { setGalleryImages(wellzenImages); setGalleryIndex(wellzenSlideIdx); }}
+                title={isEn ? 'Click to view gallery' : '클릭하여 사진 크게보기'}
+              >
+                {wellzenImages.map((src, idx) => (
+                  <img
+                    key={src}
+                    src={src}
+                    alt={`Wellzen R&D ${idx + 1}`}
+                    className={`bm-infra-slide-img ${idx === wellzenSlideIdx ? 'active' : ''}`}
+                  />
+                ))}
+                <div className="bm-infra-slide-indicators">
+                  {wellzenImages.map((_, idx) => (
+                    <span
+                      key={idx}
+                      className={`bm-infra-indicator ${idx === wellzenSlideIdx ? 'active' : ''}`}
+                      onClick={(e) => { e.stopPropagation(); setWellzenSlideIdx(idx); }}
+                    />
+                  ))}
+                </div>
+                <div className="bm-infra-zoom-hint">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    <line x1="11" y1="8" x2="11" y2="14" />
+                    <line x1="8" y1="11" x2="14" y2="11" />
+                  </svg>
+                </div>
+              </div>
+
+              <div className="bm-infra-card bm-infra-text-card animate-child slide-right">
+                <span className="bm-infra-code">R&amp;D CENTER</span>
+                <h3 className="bm-infra-title">{isEn ? 'R&D Center' : 'R&D연구소'}</h3>
+                <p className="bm-infra-desc">
+                  {isEn
+                    ? 'Specialized pet research laboratory leading quality verification and core technology development.'
+                    : '반려동물 전문 연구소로 고품질 원료 검증 및 기술 개발을 주도합니다.'}
+                </p>
+                <div className="bm-infra-tags">
+                  <span className="bm-infra-tag bm-tag-blue">{isEn ? 'Healthcare R&D' : '헬스케어 R&D'}</span>
+                  <span className="bm-infra-tag bm-tag-blue">{isEn ? 'Raw Material Tech' : '원료가공 기술'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* ROW 3: [좌] LOGISTICS CENTER | [우] 물류센터 동영상 자동재생 */}
+            <div className="bm-infra-row" ref={infraRow3Ref}>
+              <div className="bm-infra-card bm-infra-text-card animate-child slide-left">
+                <span className="bm-infra-code">LOGISTICS CENTER</span>
+                <h3 className="bm-infra-title">{isEn ? 'Integrated Logistics Center' : '통합 물류센터'}</h3>
+                <p className="bm-infra-desc">
+                  {isEn
+                    ? 'Systematic inventory management and an optimized logistics system deliver a safe, fast delivery network.'
+                    : '체계적인 재고관리와 최적화된 물류시스템을 통해 안전하고 신속한 배송네트워크를 제공합니다.'}
+                </p>
+                <div className="bm-infra-tags">
+                  <span className="bm-infra-tag bm-tag-blue">{isEn ? 'Nationwide Network' : '전국 공급망'}</span>
+                  <span className="bm-infra-tag bm-tag-blue">{isEn ? 'Global Network' : '글로벌 공급망'}</span>
+                </div>
+              </div>
+
+              <div
+                className="bm-infra-card bm-infra-media-card bm-infra-video-card animate-child slide-right"
+                onClick={() => setShowLogisticsVideo(true)}
+                title={isEn ? 'Click to play full video' : '클릭하여 영상 전체화면 재생'}
+              >
+                <video
+                  src="./assets/logistics/logistics.mp4"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="bm-infra-video"
+                />
+              </div>
+            </div>
+
+            {/* ROW 4: [좌] 칭다오 공장 이미지 로테이션 | [우] GLOBAL NETWORK */}
+            <div className="bm-infra-row" ref={infraRow4Ref}>
+              <div
+                className="bm-infra-card bm-infra-media-card animate-child slide-left"
+                onClick={() => { setGalleryImages(qingdaoImages); setGalleryIndex(qingdaoSlideIdx); }}
+                title={isEn ? 'Click to view photo' : '클릭하여 사진 크게보기'}
+              >
+                {qingdaoImages.map((src, idx) => (
+                  <img
+                    key={src}
+                    src={src}
+                    alt={`Qingdao Factory ${idx + 1}`}
+                    className={`bm-infra-slide-img ${idx === qingdaoSlideIdx ? 'active' : ''}`}
+                  />
+                ))}
+                <div className="bm-infra-slide-indicators">
+                  {qingdaoImages.map((_, idx) => (
+                    <span
+                      key={idx}
+                      className={`bm-infra-indicator ${idx === qingdaoSlideIdx ? 'active' : ''}`}
+                      onClick={(e) => { e.stopPropagation(); setQingdaoSlideIdx(idx); }}
+                    />
+                  ))}
+                </div>
+                <div className="bm-infra-zoom-hint">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    <line x1="11" y1="8" x2="11" y2="14" />
+                    <line x1="8" y1="11" x2="14" y2="11" />
+                  </svg>
+                </div>
+              </div>
+
+              <div className="bm-infra-card bm-infra-text-card animate-child slide-right">
+                <span className="bm-infra-code">GLOBAL NETWORK</span>
+                <h3 className="bm-infra-title">{isEn ? 'Qingdao Plant' : '칭다오 공장'}</h3>
+                <p className="bm-infra-desc">
+                  {isEn
+                    ? 'Cat litter production and pet supply OEM/ODM factory.'
+                    : '고양이 모래 생산 및 펫 용품 OEM/ODM 공장입니다.'}
+                </p>
+                <div className="bm-infra-tags">
+                  <span className="bm-infra-tag bm-tag-amber">{isEn ? 'Hygiene Products' : '위생용품'}</span>
+                  <span className="bm-infra-tag bm-tag-amber">{isEn ? 'Global OEM/ODM' : '글로벌 OEM/ODM'}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* SECTION 3: DOMESTIC PARTNERS MARQUEE WALL */}
-      <section style={{ background: '#FFFFFF', padding: '50px 0', borderTop: '1px solid var(--dh-border)' }}>
-        <div className="daesang-container-wide" style={{ marginBottom: '24px', textAlign: 'center' }}>
-          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--dh-blue)', letterSpacing: '0.08em', display: 'block', marginBottom: '6px', textTransform: 'uppercase' }}>
-            Trusted by Major Retail Networks
-          </span>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--dh-navy)', wordBreak: 'keep-all' }}>
-            {isEn ? 'Domestic Retail Partners' : '부명과 함께하는 국내 대형 유통 파트너'}
-          </h2>
-          <p style={{ color: 'var(--dh-text-muted)', fontSize: '0.82rem', marginTop: '6px', wordBreak: 'keep-all' }}>
-            {isEn
-              ? 'Supplying premium pet products to over 13 major hypermarkets, marts, and online channels in Korea.'
-              : '이마트, 홈플러스, 코스트코, 쿠팡, 편의점 4사 등 국내 13개 이상 유통 채널에 검증된 제품을 공급합니다.'}
-          </p>
-        </div>
+      {/* ====== SECTION 2: 브랜드(좌측 지그재그) + 대표 상품(우측 3열 바둑판) 통합 스플릿 섹션 ====== */}
+      <section className="bm-section bm-section-white">
+        <div className="bm-container">
+          {/* 섹션 상단 공통 헤더 */}
+          <div className="bm-section-header" style={{ marginBottom: '36px' }}>
+            <span className="bm-section-tag">Core Brands &amp; Products</span>
+            <h2 className="bm-section-title">
+              {isEn ? 'Our Brands & Best Products' : '부명 핵심 브랜드 & 대표 상품'}
+            </h2>
+            <p className="bm-section-desc">
+              {isEn
+                ? 'Specialized pet care brands and verified bestseller lineup built on science and trust.'
+                : '과학과 신뢰로 만든 부명의 대표 펫 케어 브랜드와 엄선된 베스트셀러 제품 라인업입니다.'}
+            </p>
+          </div>
 
-        {/* SECTION: 대형 유통사 로고 무한 마퀴(가로 스크롤) */}
-        <div className="marquee-container">
-          <div className="marquee-track">
-            {marqueePartners.map((p, idx) => (
-              <div key={`${p.id}-${idx}`} className="marquee-item" title={isEn ? p.nameEn : p.nameKo} style={{ width: '150px', height: '75px', padding: '6px' }}>
-                <img src={p.logo} alt={p.nameKo} style={{ maxHeight: '95%', maxWidth: '95%', objectFit: 'contain', transform: 'scale(1.2)' }} />
+          <div className="bm-split-section">
+            {/* 좌측: 자체 브랜드 4개 지그재그 레이아웃 */}
+            <div className="bm-split-brands-col">
+              <div className="bm-brand-zigzag-list" ref={brandsSectionRef}>
+                {ownBrands.map((b, idx) => (
+                  <Link
+                    key={b.id}
+                    to={`/brands/${b.id}`}
+                    className={`bm-brand-card-zigzag ${idx % 2 === 0 ? 'zigzag-left' : 'zigzag-right'} animate-child`}
+                    style={{ '--card-accent': b.color }}
+                  >
+                    <div className="bm-brand-zigzag-logo">
+                      {b.logo && <img src={b.logo} alt={b.nameKo} />}
+                    </div>
+                    <div className="bm-brand-zigzag-info">
+                      <h3 className="bm-brand-zigzag-name">
+                        {isEn ? (b.nameEn || b.nameKo) : b.nameKo}
+                      </h3>
+                      <span className="bm-brand-zigzag-tagline">{b.tagline}</span>
+                      <p className="bm-brand-zigzag-desc">
+                        {isEn ? b.descriptionEn : b.descriptionKo}
+                      </p>
+                    </div>
+                    <div className="bm-brand-zigzag-arrow">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </Link>
+                ))}
               </div>
+            </div>
+
+            {/* 우측: 상품 3열 바둑판 (3열 x 2행 = 6개) - 상단 텍스트 삭제 및 위아래 지그재그 애니메이션 */}
+            <div className="bm-split-products-col">
+              <div className="bm-products-bento-grid" ref={productsSectionRef}>
+                {featuredProducts.map((product, idx) => {
+                  const brand = brands.find(b => b.id === product.brandId);
+                  const brandName = brand ? (isEn ? (brand.nameEn || brand.nameKo) : brand.nameKo) : '';
+                  const zigzagClass = idx % 2 === 0 ? 'product-zigzag-up' : 'product-zigzag-down';
+                  return (
+                    <Link
+                      key={product.id}
+                      to={`/catalog/${product.id}`}
+                      className={`bm-product-card-compact animate-child ${zigzagClass}`}
+                    >
+                      <div className="bm-product-card-image">
+                        {product.image ? (
+                          <img src={product.image} alt={product.nameKo} />
+                        ) : (
+                          <div className="bm-placeholder-image" />
+                        )}
+                      </div>
+                      <div className="bm-product-card-info">
+                        <span className="bm-product-card-brand">{brandName}</span>
+                        <h3 className="bm-product-card-name">
+                          {isEn ? (product.nameEn || product.nameKo) : product.nameKo}
+                        </h3>
+                        <span className="bm-product-card-spec">{product.spec}</span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ====== SECTION 3: 수입 브랜드 하이라이트 ====== */}
+      <section className="bm-section bm-section-light">
+        <div className="bm-container">
+          <div className="bm-section-header">
+            <span className="bm-section-tag">Imported Brands</span>
+            <h2 className="bm-section-title">
+              {isEn ? 'Global Brand Partners' : '세계에서 엄선한 수입 브랜드'}
+            </h2>
+            <p className="bm-section-desc">
+              {isEn
+                ? 'Carefully selected premium brands from around the world.'
+                : '전 세계에서 엄선한 프리미엄 펫 브랜드를 국내에 소개합니다.'}
+            </p>
+          </div>
+          <div className="bm-imported-grid" ref={importedSectionRef}>
+            {importedBrands.map((b) => (
+              <Link
+                key={b.id}
+                to={`/imported-brands/${b.id}`}
+                className="bm-imported-card animate-child"
+              >
+                <div className="bm-imported-card-logo">
+                  {b.logo && <img src={b.logo} alt={b.nameKo} />}
+                </div>
+                <h3 className="bm-imported-card-name">
+                  {isEn ? (b.nameEn || b.nameKo) : b.nameKo}
+                </h3>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* SECTION 3-2: 국내 펫 전문 유통사 카드 섹션 */}
-      <section style={{ background: '#FFFFFF', padding: '50px 0', borderTop: '1px solid var(--dh-border)' }}>
-        <div className="daesang-container-wide" style={{ marginBottom: '24px', textAlign: 'center' }}>
-          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--dh-blue)', letterSpacing: '0.08em', display: 'block', marginBottom: '6px', textTransform: 'uppercase' }}>
-            Trusted by Pet Specialty Distributors
+      {/* ====== SECTION 4: 파트너 로고 마퀴 ====== */}
+      <section className="bm-marquee-section animate-on-scroll fade-up" ref={marqueeRef}>
+        {/* 국내 대형 유통 파트너 */}
+        <div className="bm-marquee-header">
+          <span className="bm-section-tag" style={{ textAlign: 'center', display: 'block' }}>
+            {isEn ? 'TRUSTED BY MAJOR RETAIL NETWORKS' : 'TRUSTED BY MAJOR RETAIL NETWORKS'}
           </span>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--dh-navy)', wordBreak: 'keep-all' }}>
-            {isEn ? 'Domestic Pet Specialty Distributors' : '부명과 함께 하는 국내 펫 전문 유통사'}
+          <h2 className="bm-section-title" style={{ textAlign: 'center' }}>
+            {isEn ? 'Major Retail Partners with BOOMYUNG' : '부명과 함께하는 국내 대형 유통 파트너'}
           </h2>
-          <p style={{ color: 'var(--dh-text-muted)', fontSize: '0.82rem', marginTop: '6px', wordBreak: 'keep-all' }}>
+          <p className="bm-section-desc" style={{ textAlign: 'center', margin: '0 auto' }}>
             {isEn
-              ? 'Supplying verified products to major domestic pet specialty distribution channels including THEKICO, SUJINPET, Dog & Cat Paradise, and WellPet Company.'
+              ? 'Supplying verified products to major retail networks including E-Mart, Homeplus, Costco, Coupang, and convenience stores.'
+              : '이마트, 홈플러스, 코스트코, 쿠팡, 편의점 4사 등 국내 13개 이상 유통 채널에 검증된 제품을 공급합니다.'}
+          </p>
+        </div>
+
+        {/* 대형 유통사 마퀴 */}
+        <div className="bm-marquee-container">
+          <div className="bm-marquee-track">
+            {marqueePartners.map((p, idx) => (
+              <div key={`${p.id}-${idx}`} className="bm-marquee-item bm-marquee-item-retail" title={isEn ? p.nameEn : p.nameKo}>
+                <img src={p.logo} alt={p.nameKo} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 국내 펫 전문 유통사 */}
+        <div className="bm-marquee-header" style={{ marginTop: '56px', marginBottom: '28px' }}>
+          <span className="bm-section-tag" style={{ textAlign: 'center', display: 'block' }}>
+            {isEn ? 'TRUSTED BY PET SPECIALTY DISTRIBUTORS' : 'TRUSTED BY PET SPECIALTY DISTRIBUTORS'}
+          </span>
+          <h2 className="bm-section-title" style={{ textAlign: 'center' }}>
+            {isEn ? 'Pet Specialty Distributors' : '부명과 함께 하는 국내 펫 전문 유통사'}
+          </h2>
+          <p className="bm-section-desc" style={{ textAlign: 'center', margin: '0 auto' }}>
+            {isEn
+              ? 'Supplying premium pet products to leading pet specialty distributors including Seonjin Pet, Kkio, Dog & Cat Paradise, and THE KICO.'
               : '선진펫, 꼬기오, 야옹아멍멍해봐, 더 키코 등 국내 대형 펫 유통 채널에 검증된 제품을 공급합니다.'}
           </p>
         </div>
 
-        {/* SECTION: 펫 전문 유통사 로고 무한 마퀴(가로 스크롤) - 대형유통사 섹션과 동일한 카드/로고 사이즈 */}
-        <div className="marquee-container">
-          <div className="marquee-track">
+        {/* 펫 전문 유통사 마퀴 */}
+        <div className="bm-marquee-container">
+          <div className="bm-marquee-track" style={{ animationDirection: 'reverse' }}>
             {marqueePetRetailPartners.map((p, idx) => (
-              <div
-                key={`${p.id}-${idx}`}
-                className="marquee-item"
-                title={p.logo ? (isEn ? p.nameEn : p.nameKo) : undefined}
-                style={{ width: '150px', height: '75px', padding: '6px', borderStyle: p.logo ? 'solid' : 'dashed' }}
-              >
+              <div key={`pet-${p.id}-${idx}`} className="bm-marquee-item bm-marquee-item-pet" title={isEn ? p.nameEn : p.nameKo}>
                 {p.logo ? (
-                  <img src={p.logo} alt={p.nameKo} style={{ maxHeight: '55%', maxWidth: '80%', objectFit: 'contain' }} />
+                  <img src={p.logo} alt={p.nameKo} />
                 ) : (
-                  <span style={{ fontSize: '0.66rem', color: '#CBD5E1', fontWeight: 600, textAlign: 'center' }}>
+                  <span style={{ fontSize: '0.66rem', color: '#CBD5E1', fontWeight: 600 }}>
                     {isEn ? 'Coming Soon' : '로고 추가 예정'}
                   </span>
                 )}
@@ -330,28 +562,142 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 4: GLOBAL REACH & CONTACT CTA */}
-      <section className="daesang-section" style={{ height: '70vh', minHeight: '650px', backgroundImage: "url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2560&q=80')" }}>
-        <div className="daesang-section-overlay" style={{ background: 'rgba(0,0,0,0.35)' }}></div>
-        <div className="daesang-section-content" style={{ position: 'relative', zIndex: 3 }}>
-          <span className="daesang-poetic-sub">Global Partnership & Export</span>
-          <h2 className="daesang-poetic-title">
-            {isEn 
-              ? "Connecting domestic retail and global export markets." 
-              : "국내 대형 유통망을 넘어 세계 시장으로"}
-          </h2>
-          <p className="daesang-poetic-desc">
-            {isEn
-              ? "Collaborating with leading retail partners and international buyers to deliver excellence worldwide."
-              : "대형 할인마트, 이커머스 및 글로벌 수출 네트워크를 기반으로 국내외 B2B 비즈니스 파트너십을 확장해 나갑니다."}
-          </p>
-          <Link to="/contact" className="daesang-btn-minimal">
-            {isEn ? 'INQUIRE B2B PARTNERSHIP' : 'B2B 입점 및 수출 문의'}
-          </Link>
+      {/* ====== SECTION 6: B2B 파트너십 섹션 ====== */}
+      <section className="bm-b2b-section animate-on-scroll fade-up" ref={ctaRef}>
+        <div className="bm-b2b-container">
+          <div className="bm-b2b-main">
+            {/* 좌측: 빌딩 배경 + 타이틀 영역 */}
+            <div className="bm-b2b-left" style={{ backgroundImage: `url(${b2bBuildingImg})` }}>
+              <div className="bm-b2b-left-content">
+                <span className="bm-b2b-tag">BUSINESS PARTNERSHIP</span>
+                <h2 className="bm-b2b-title">
+                  {isEn
+                    ? 'Partner with BOOMYUNG for Premium Pet Products'
+                    : '부명과 함께하는\n비즈니스 파트너십'}
+                </h2>
+                <p className="bm-b2b-desc">
+                  {isEn
+                    ? 'From domestic retail to global exports, we expand reliable partnerships with proven pet care products.'
+                    : '국내 대형 유통망부터 글로벌 수출까지, 검증된 펫 케어 제품으로 파트너십을 확장합니다.'}
+                </p>
+              </div>
+            </div>
+
+            {/* 우측: 명함 2장 가로 나란히 배치 */}
+            <div className="bm-b2b-right">
+              <div className="bm-b2b-cards-grid">
+                {/* 영업1팀 명함 */}
+                <div
+                  className="bm-biz-card"
+                  onClick={() => {
+                    const cardImg = isEn ? './assets/business_cards/team2_en.png' : './assets/business_cards/team2_kr.png';
+                    setGalleryImages([cardImg]);
+                    setGalleryIndex(0);
+                  }}
+                  title={isEn ? 'Click to enlarge business card' : '클릭하여 명함 크게보기'}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="bm-biz-card-img-wrap">
+                    <img
+                      src={isEn ? './assets/business_cards/team2_en.png' : './assets/business_cards/team2_kr.png'}
+                      alt={isEn ? 'Sales Team 1 Business Card' : '영업1팀 명함'}
+                    />
+                  </div>
+                  <div className="bm-biz-card-meta">
+                    <span className="bm-biz-card-badge">{isEn ? 'Domestic Retail' : '국내 유통'}</span>
+                    <p className="bm-biz-card-desc">
+                      {isEn
+                        ? 'Hypermarkets, convenience stores, and domestic e-commerce channels.'
+                        : '대형 할인마트, 편의점 및 국내 이커머스 입점 총괄'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* 영업2팀 명함 */}
+                <div
+                  className="bm-biz-card"
+                  onClick={() => {
+                    const cardImg = isEn ? './assets/business_cards/team1_en.png' : './assets/business_cards/team1_kr.png';
+                    setGalleryImages([cardImg]);
+                    setGalleryIndex(0);
+                  }}
+                  title={isEn ? 'Click to enlarge business card' : '클릭하여 명함 크게보기'}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="bm-biz-card-img-wrap">
+                    <img
+                      src={isEn ? './assets/business_cards/team1_en.png' : './assets/business_cards/team1_kr.png'}
+                      alt={isEn ? 'Sales Team 2 Business Card' : '영업2팀 명함'}
+                    />
+                  </div>
+                  <div className="bm-biz-card-meta">
+                    <span className="bm-biz-card-badge">{isEn ? 'Global & OEM' : '글로벌 · OEM'}</span>
+                    <p className="bm-biz-card-desc">
+                      {isEn
+                        ? 'Global exports, overseas buyer inquiries, and OEM/ODM projects.'
+                        : '해외 수출, 글로벌 바이어 제휴 및 OEM/ODM 생산 협력'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 하단: Image 4 스타일 안내 문구 및 문의 버튼 */}
+          <div className="bm-b2b-bottom">
+            <p className="bm-b2b-bottom-text">
+              {isEn
+                ? 'We partner with major discount hypermarkets, e-commerce, global buyers, OEM/ODM, and overseas export. Let us know your requirements.'
+                : '대형 할인마트, 이커머스, 글로벌 바이어와 OEM/ODM 및 수출 파트너십을 진행합니다. 필요한 내용을 알려주세요.'}
+            </p>
+            <Link to="/contact" className="bm-b2b-bottom-btn">
+              <span>{isEn ? 'B2B Inquiries' : 'B2B 문의하기'}</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            </Link>
+          </div>
         </div>
       </section>
+
+      {/* SECTION: 물류센터 소개 영상 팝업 */}
+      {showLogisticsVideo && (
+        <div className="modal-backdrop" onClick={() => setShowLogisticsVideo(false)}>
+          <div
+            className="modal-content"
+            onClick={e => e.stopPropagation()}
+            style={{ maxWidth: '860px', width: '90%', background: '#000000', padding: 0, borderRadius: '10px', overflow: 'hidden' }}
+          >
+            <button className="modal-close-btn" onClick={() => setShowLogisticsVideo(false)} style={{ position: 'fixed', top: '24px', right: '32px' }}>&times;</button>
+            <video
+              src="./assets/logistics/logistics.mp4"
+              controls
+              autoPlay
+              style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '80vh' }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* SECTION: 인프라 카드 클릭 시 나오는 이미지 확대(라이트박스) 팝업 - 이전/다음 이동 가능 */}
+      {galleryImages && (
+        <div className="modal-backdrop" onClick={closeGallery}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <button className="modal-close-btn" onClick={closeGallery}>&times;</button>
+            <img src={galleryImages[galleryIndex]} alt="" />
+            {galleryImages.length > 1 && (
+              <div className="modal-caption">
+                <span style={{ fontSize: '0.85rem', color: '#AAA' }}>{galleryIndex + 1} / {galleryImages.length}</span>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button className="modal-nav-btn" onClick={prevGalleryImage}>&larr; {isEn ? 'Prev' : '이전'}</button>
+                  <button className="modal-nav-btn" onClick={nextGalleryImage}>{isEn ? 'Next' : '다음'} &rarr;</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-

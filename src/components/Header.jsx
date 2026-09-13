@@ -1,64 +1,163 @@
-// 이 파일은 헤더(상단 네비게이션) 컴포넌트입니다.
-// 모든 페이지 상단에 고정 표시되며, 로고/메뉴/언어 전환 버튼을 포함합니다.
-import React from 'react';
+// 리뉴얼 헤더 컴포넌트.
+// 투명→화이트 전환 + 메가메뉴 드롭다운 + 모바일 드로어 메뉴.
+import React, { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
+import { useData } from '../context/DataContext';
 
 export default function Header() {
-  const { lang, toggleLang } = useLanguage(); // 현재 언어(ko/en)와 전환 함수
+  const { lang, toggleLang } = useLanguage();
   const isEn = lang === 'en';
+  const { brands } = useData();
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // 자체 브랜드 / 수입 브랜드 분리
+  const ownBrands = brands.filter(b => b.type === 'own');
+  const importedBrands = brands.filter(b => b.type === 'imported');
+
+  // 스크롤 감지 — 50px 이상 내리면 scrolled 상태로 전환
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // 모바일 드로어 열릴 때 body 스크롤 잠금
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
 
   return (
-    <header className="daesang-header">
-      {/* SECTION: 좌측 로고 + 회사명 (클릭 시 홈으로 이동) */}
-      <Link to="/" className="daesang-logo">
-        <img 
-          src="./assets/boomyung_ci_logo.png" 
-          alt="BOOMYUNG CO., LTD." 
-          style={{ height: '46px', objectFit: 'contain' }}
-        />
-        <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-          <span style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--dh-blue)', letterSpacing: '0.02em', lineHeight: 1.1 }}>
-            {isEn ? 'BOOMYUNG' : '(주)부명'}
-          </span>
-          <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748B', letterSpacing: '0.08em' }}>
-            BOOMYUNG CO., LTD.
-          </span>
-        </div>
-      </Link>
+    <>
+      <header className={`bm-header ${scrolled ? 'scrolled' : ''}`}>
+        {/* 로고 */}
+        <Link to="/" className="bm-logo">
+          <img src="./assets/boomyung_ci_logo.png" alt="BOOMYUNG" />
+          <div className="bm-logo-text">
+            <span className="bm-company-name">{isEn ? 'BOOMYUNG' : '(주)부명'}</span>
+            <span className="bm-company-sub">BOOMYUNG CO., LTD.</span>
+          </div>
+        </Link>
 
-      {/* SECTION: 상단 메인 메뉴 (홈/회사소개/브랜드/수입브랜드/카탈로그/신뢰와 인증/문의) */}
-      <nav className="daesang-nav">
-        <NavLink to="/" className={({ isActive }) => (isActive ? 'active' : '')} end>
+        {/* PC 네비게이션 */}
+        <nav className="bm-nav">
+          <NavLink to="/" className={({ isActive }) => `bm-nav-item ${isActive ? 'active' : ''}`} end>
+            {isEn ? 'Home' : '홈'}
+          </NavLink>
+          <NavLink to="/about" className={({ isActive }) => `bm-nav-item ${isActive ? 'active' : ''}`}>
+            {isEn ? 'About Us' : '회사소개'}
+          </NavLink>
+
+          {/* 브랜드 — 메가메뉴 (다른 네비와 동일한 NavLink bm-nav-item 구조) */}
+          <NavLink
+            to="/brands"
+            className={({ isActive }) => `bm-nav-item bm-nav-mega-item ${isActive ? 'active' : ''}`}
+          >
+            {isEn ? 'Brands' : '브랜드'}
+            <div className="bm-mega-menu" onClick={(e) => e.stopPropagation()}>
+              <div className="bm-mega-menu-title">{isEn ? 'OUR BRANDS' : '자체 브랜드'}</div>
+              <div className="bm-mega-menu-grid">
+                {ownBrands.map(b => (
+                  <Link key={b.id} to={`/brands/${b.id}`} className="bm-mega-menu-item">
+                    {b.logo && <img src={b.logo} alt={b.nameKo} />}
+                    <span className="mega-item-name">{isEn ? (b.nameEn || b.nameKo) : b.nameKo}</span>
+                  </Link>
+                ))}
+              </div>
+              {importedBrands.length > 0 && (
+                <>
+                  <div className="bm-mega-menu-title" style={{ marginTop: '18px' }}>
+                    {isEn ? 'IMPORTED BRANDS' : '수입 브랜드'}
+                  </div>
+                  <div className="bm-mega-menu-grid">
+                    {importedBrands.map(b => (
+                      <Link key={b.id} to={`/imported-brands/${b.id}`} className="bm-mega-menu-item">
+                        {b.logo && <img src={b.logo} alt={b.nameKo} />}
+                        <span className="mega-item-name">{isEn ? (b.nameEn || b.nameKo) : b.nameKo}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </NavLink>
+
+          <NavLink to="/catalog" className={({ isActive }) => `bm-nav-item ${isActive ? 'active' : ''}`}>
+            {isEn ? 'Products' : '제품 카탈로그'}
+          </NavLink>
+          <NavLink to="/trust" className={({ isActive }) => `bm-nav-item ${isActive ? 'active' : ''}`}>
+            {isEn ? 'Trust & Cert' : '신뢰와 인증'}
+          </NavLink>
+          <NavLink to="/contact" className={({ isActive }) => `bm-nav-item ${isActive ? 'active' : ''}`}>
+            {isEn ? 'Contact' : '문의하기'}
+          </NavLink>
+        </nav>
+
+        {/* 언어 전환 */}
+        <button className="bm-lang-btn" onClick={toggleLang} title={isEn ? 'Switch to Korean' : 'Switch to English'}>
+          {isEn ? 'EN' : 'KR'}
+        </button>
+
+        {/* 모바일 햄버거 */}
+        <button
+          className={`bm-hamburger ${mobileOpen ? 'open' : ''}`}
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Toggle menu"
+        >
+          <span /><span /><span />
+        </button>
+      </header>
+
+      {/* 모바일 드로어 오버레이 */}
+      <div
+        className={`bm-mobile-drawer-overlay ${mobileOpen ? 'open' : ''}`}
+        onClick={() => setMobileOpen(false)}
+      />
+
+      {/* 모바일 드로어 */}
+      <nav className={`bm-mobile-drawer ${mobileOpen ? 'open' : ''}`}>
+        <NavLink to="/" className="bm-mobile-nav-item" onClick={() => setMobileOpen(false)} end>
           {isEn ? 'Home' : '홈'}
         </NavLink>
-        <NavLink to="/about" className={({ isActive }) => (isActive ? 'active' : '')}>
+        <NavLink to="/about" className="bm-mobile-nav-item" onClick={() => setMobileOpen(false)}>
           {isEn ? 'About Us' : '회사소개'}
         </NavLink>
-        <NavLink to="/brands" className={({ isActive }) => (isActive ? 'active' : '')}>
+        <NavLink to="/brands" className="bm-mobile-nav-item" onClick={() => setMobileOpen(false)}>
           {isEn ? 'Brands' : '브랜드'}
         </NavLink>
-        <NavLink to="/imported-brands" className={({ isActive }) => (isActive ? 'active' : '')}>
-          {isEn ? 'Imported Brands' : '수입브랜드'}
+        {/* 모바일 브랜드 서브메뉴 */}
+        <div className="bm-mobile-sub-items">
+          {brands.map(b => (
+            <Link
+              key={b.id}
+              to={b.type === 'own' ? `/brands/${b.id}` : `/imported-brands/${b.id}`}
+              className="bm-mobile-sub-item"
+              onClick={() => setMobileOpen(false)}
+            >
+              {b.logo && <img src={b.logo} alt={b.nameKo} />}
+              <span>{isEn ? (b.nameEn || b.nameKo) : b.nameKo}</span>
+            </Link>
+          ))}
+        </div>
+        <NavLink to="/catalog" className="bm-mobile-nav-item" onClick={() => setMobileOpen(false)}>
+          {isEn ? 'Products' : '제품 카탈로그'}
         </NavLink>
-        <NavLink to="/catalog" className={({ isActive }) => (isActive ? 'active' : '')}>
-          {isEn ? 'Product Catalog' : '제품 카탈로그'}
+        <NavLink to="/trust" className="bm-mobile-nav-item" onClick={() => setMobileOpen(false)}>
+          {isEn ? 'Trust & Certification' : '신뢰와 인증'}
         </NavLink>
-        <NavLink to="/trust" className={({ isActive }) => (isActive ? 'active' : '')}>
-          {isEn ? 'Trust & Quality' : '신뢰와 인증'}
+        <NavLink to="/contact" className="bm-mobile-nav-item" onClick={() => setMobileOpen(false)}>
+          {isEn ? 'Contact' : '문의하기'}
         </NavLink>
-        <NavLink to="/contact" className={({ isActive }) => (isActive ? 'active' : '')}>
-          {isEn ? 'Contact Us' : '문의하기'}
-        </NavLink>
+        <div style={{ marginTop: '24px' }}>
+          <button className="bm-lang-btn" onClick={toggleLang}
+            style={{ background: '#F1F5F9', border: '1px solid #E5E7EB', color: '#1A1A2E', width: '100%', padding: '10px' }}>
+            {isEn ? 'English → 한국어' : '한국어 → English'}
+          </button>
+        </div>
       </nav>
-
-      {/* SECTION: 우측 언어 전환 버튼 (한국어 <-> 영어) */}
-      <div className="daesang-header-right">
-        <button className="daesang-lang" onClick={toggleLang} title={isEn ? 'Switch to Korean' : 'Switch to English'}>
-          🌐 {isEn ? 'EN' : 'KR'} | {isEn ? '한국어' : 'English'}
-        </button>
-      </div>
-    </header>
+    </>
   );
 }
-

@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useData } from '../context/DataContext';
+import { translateIngredients } from '../utils/translateIngredients';
 import './ProductDetail.css';
 
 // 카테고리/동물종류 한글 -> 영문 매핑 (영어 모드 표시용)
@@ -56,7 +57,7 @@ export default function ProductDetail() {
 
   const shelfLifeText = isEn ? (product.shelfLifeEn || '18 months from manufacturing date') : product.shelfLife;
   const originText = isEn ? (product.originEn || 'Republic of Korea') : product.origin;
-  const ingredientsText = isEn ? (product.ingredientsEn || product.ingredients) : product.ingredients;
+  const ingredientsText = isEn ? (product.ingredientsEn || translateIngredients(product.ingredients)) : product.ingredients;
 
   // 값이 비어있는 항목은 표에 빈 줄로 남지 않도록 걸러낸다 (예전에 저장된 데이터 대비)
   const nutritionEntries = Object.entries(product.nutrition || {}).filter(([, v]) => v && String(v).trim());

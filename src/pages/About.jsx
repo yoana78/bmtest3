@@ -1,16 +1,20 @@
-// 이 파일은 "회사소개" 페이지입니다 (주소: /about).
-// CEO 인사말, 연혁, 생산/R&D 인프라, CI(로고) 소개를 순서대로 보여줍니다.
-import React, { useState } from 'react';
-import { useLanguage } from '../i18n/LanguageContext';
+// 리뉴얼 회사소개 페이지 (About Us Renewal 2026)
+// 1. 역동적 서브 히어로 + 핵심 지표 바 (Stats Bar: 30년+, HACCP/ISO, 5대 대형유통 등)
+// 2. 비대칭 CEO 인사말 (좌측 블루 프로필/명함 카드 + 우측 감성 본문 및 공식 서명)
+// 3. 인터랙티브 타임라인 (전체/설립도약기/품질혁신기/글로벌확장기 필터 탭 + 중앙 연결 노드)
+// 4. 생산 및 R&D 인프라 쇼케이스 (공장/연구소/물류센터/칭다오 탭 전환 + 라이트박스 갤러리 + 비디오 팝업)
+// 5. CI 시스템 (대형 로고 쇼케이스 + 다운로드 버튼 + 컬러 칩 팔레트 + 3대 핵심 가치 카드)
 
-// 인프라 섹션의 "웰젠" 카드를 클릭하면 뜨는 갤러리 이미지들
+import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
+import { useScrollAnimation, useStaggerAnimation } from '../hooks/useScrollAnimation';
+
+// 인프라 섹션 이미지 데이터
 const wellzenImages = [
   './assets/wellzen/wellzen_01.png',
-  './assets/wellzen/wellzen_02.png',
-  './assets/wellzen/wellzen_03.png'
+  './assets/wellzen/wellzen_02.png'
 ];
 
-// 인프라 섹션의 "호마드 공장" 카드를 클릭하면 뜨는 갤러리 이미지들
 const homadImages = [
   './assets/homad/homad_01.jpg',
   './assets/homad/homad_02.jpg',
@@ -18,190 +22,437 @@ const homadImages = [
   './assets/homad/homad_04.jpg'
 ];
 
-// 인프라 섹션의 "칭다오 공장" 카드를 클릭하면 뜨는 갤러리 이미지들
 const qingdaoImages = [
-  './assets/china/qingdao-factory.jpg'
+  './assets/china/qingdao-factory.jpg',
+  './assets/china/sand_factory_02.jpg'
 ];
 
 export default function About() {
   const { lang } = useLanguage();
   const isEn = lang === 'en';
-  const [galleryImages, setGalleryImages] = useState(null); // 현재 팝업으로 보여줄 갤러리 이미지 목록 (없으면 null)
-  const [galleryIndex, setGalleryIndex] = useState(0); // 갤러리 팝업에서 현재 크게 보여지는 이미지의 인덱스
+
+  // 갤러리 및 비디오 팝업 상태
+  const [galleryImages, setGalleryImages] = useState(null);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [showLogisticsVideo, setShowLogisticsVideo] = useState(false);
+
+  // 인프라 활성 탭 (0: 사료 공장, 1: 연구소, 2: 통합 물류센터, 3: 칭다오 공장)
+  const [activeInfraTab, setActiveInfraTab] = useState(0);
+  // 인프라 사진 자동 로테이션 슬라이드 인덱스
+  const [infraSlideIdx, setInfraSlideIdx] = useState(0);
+
+  // 스크롤 애니메이션 Ref (카드 순차 등장 속도 조절)
+  const statsRef = useStaggerAnimation({ staggerDelay: 150 });
+  const ceoRef = useScrollAnimation();
+  const timelineRef = useStaggerAnimation({ staggerDelay: 60 });
+  const infraRef = useScrollAnimation();
+  const ciRef = useScrollAnimation();
+
   const closeGallery = () => setGalleryImages(null);
   const prevGalleryImage = () => setGalleryIndex(i => (i - 1 + galleryImages.length) % galleryImages.length);
   const nextGalleryImage = () => setGalleryIndex(i => (i + 1) % galleryImages.length);
-  const [showLogisticsVideo, setShowLogisticsVideo] = useState(false); // 물류센터 소개 영상 팝업 표시 여부
 
-  // 회사 연혁 목록 (연도순, 최신이 위) - "3. 연혁" 섹션의 타임라인에 표시됨
+  // 탭 변경 시 슬라이드 인덱스 리셋
+  useEffect(() => {
+    setInfraSlideIdx(0);
+  }, [activeInfraTab]);
+
+  // 사진 자동 로테이션 (3초 간격)
+  useEffect(() => {
+    const currentTabImages = infraTabs[activeInfraTab]?.images;
+    if (!currentTabImages || currentTabImages.length <= 1) return;
+
+    const timer = setInterval(() => {
+      setInfraSlideIdx(prev => (prev + 1) % currentTabImages.length);
+    }, 3200);
+
+    return () => clearInterval(timer);
+  }, [activeInfraTab]);
+
+  // 1. 핵심 지표 통계 데이터
+  const statsData = [
+    {
+      numKo: '30 YEARS+',
+      numEn: '30 YEARS+',
+      labelKo: '역사와 신뢰',
+      labelEn: 'Years of Trust',
+      subKo: '1995년 설립 이래 정직한 성장',
+      subEn: 'Established in 1995'
+    },
+    {
+      numKo: '국제표준인증',
+      numEn: 'ISO & HACCP',
+      labelKo: 'ISO & HACCP',
+      labelEn: 'Certified Standards',
+      subKo: 'ISO 22000 및 식품안전 인증',
+      subEn: 'ISO 22000 & HACCP Certified'
+    },
+    {
+      numKo: '통합물류센터',
+      numEn: 'Logistics Center',
+      labelKo: '최적화 물류시스템',
+      labelEn: 'Optimized Logistics',
+      subKo: '체계적인 재고관리와 배송네트워크',
+      subEn: 'Smart Inventory & Delivery'
+    },
+    {
+      numKo: 'Top Tier',
+      numEn: 'Top Tier',
+      labelKo: '국내 대형 유통망',
+      labelEn: 'Nationwide Network',
+      subKo: '이마트·GS·농협·온라인 채널 입점',
+      subEn: 'Major retail & online channels'
+    },
+    {
+      numKo: 'OEM / ODM',
+      numEn: 'OEM / ODM',
+      labelKo: '글로벌 제조 역량',
+      labelEn: 'Manufacturing Infra',
+      subKo: '사료·간식·위생용품 자체 인프라',
+      subEn: 'Pet food, snack & care tech'
+    }
+  ];
+
+  // 2. 회사 연혁 데이터 (시대별 분류 추가)
   const historyItems = [
     {
       year: '2024 ~ Present',
-      titleKo: '글로벌 네트워크 및 브랜드 확정',
-      titleEn: 'Global Network & Brand Expansion',
-      itemsKo: ['호마드 사료 간식 공장', '웰젠 R&D 연구소 체계 구축', '글로벌 OEM/ODM 공급 체인 확장'],
-      itemsEn: ['Homad pet food & snack factory', 'Established Wellzen R&D Center system', 'Expanded global OEM/ODM supply chain']
+      era: 'recent',
+      eraBadgeKo: '도약 및 글로벌화',
+      eraBadgeEn: 'Global Expansion',
+      titleKo: '글로벌 네트워크 및 자체 브랜드 고도화',
+      titleEn: 'Global Network & Brand Elevation',
+      itemsKo: ['사료 및 간식 공장 전용 라인 확장', 'R&D 연구소 첨단 분석 체계 구축', '글로벌 OEM/ODM 공급 체인 다변화'],
+      itemsEn: ['Dedicated pet food/snack production lines', 'Established advanced R&D analysis center', 'Diversified global OEM/ODM supply network']
     },
     {
       year: '2023',
+      era: 'recent',
+      eraBadgeKo: '품질 인증',
+      eraBadgeEn: 'Quality Cert',
       titleKo: '품질 인증 및 제조 혁신',
-      titleEn: 'Quality Certification & Manufacturing Innovation',
-      itemsKo: ['ISO 22000 및 HACCP 인증 획득, 전용 생산 시설 및 자동화 설비 도입'],
-      itemsEn: ['Obtained ISO 22000 & HACCP certifications, introduced specialized manufacturing & automation facilities']
+      titleEn: 'Quality Certification & Innovation',
+      itemsKo: ['ISO 22000 및 HACCP 인증 획득', '전용 자동화 생산 설비 및 멸균 포장 라인 도입'],
+      itemsEn: ['Obtained ISO 22000 & HACCP certifications', 'Introduced automated production & packaging line']
     },
     {
       year: '2021',
-      itemsKo: ['요기요 입점', 'CJ홈쇼핑 사료 입점', '하우펫 브랜드 런칭'],
-      itemsEn: ['Listed on Yogiyo', 'Listed feed on CJ Home Shopping', 'Launched HOWPET brand']
+      era: 'recent',
+      eraBadgeKo: '유통 채널',
+      eraBadgeEn: 'Omni-channel',
+      titleKo: '온·오프라인 옴니채널 입점',
+      titleEn: 'Omni-channel Network Expansion',
+      itemsKo: ['요기요 즉시배송 서비스 입점', 'CJ홈쇼핑 프리미엄 사료 론칭', '자체 프리미엄 브랜드 "하우펫" 런칭'],
+      itemsEn: ['Listed on Yogiyo delivery', 'Launched on CJ Home Shopping', 'Launched "HOWPET" premium brand']
     },
     {
       year: '2020',
-      itemsKo: ['이마트24 전점 입점', '마켓컬리 입점'],
-      itemsEn: ['Listed in all E-mart24 stores', 'Listed on Market Kurly']
+      era: 'growth',
+      eraBadgeKo: '유통 확장',
+      eraBadgeEn: 'Retail Growth',
+      titleKo: '전국 편의점 및 이커머스 입점',
+      titleEn: 'C-Store & E-Commerce Entry',
+      itemsKo: ['이마트24 전국 전점 입점', '마켓컬리 샛별배송 공식 입점'],
+      itemsEn: ['Supplying all E-mart24 stores', 'Listed on Market Kurly']
     },
     {
       year: '2019',
+      era: 'growth',
+      eraBadgeKo: '유통 확장',
+      eraBadgeEn: 'Retail Growth',
+      titleKo: '대형 유통망 공급 확대',
+      titleEn: 'Major Supermarket Expansion',
       itemsKo: ['킴스클럽 25개점 입점', '메가마트 12개점 입점'],
       itemsEn: ['Listed in 25 Kim\'s Club stores', 'Listed in 12 Megamart stores']
     },
     {
       year: '2018',
-      itemsKo: ['유망 중소기업 대상 수상', '공영홈쇼핑 사료 입점'],
-      itemsEn: ['Won Promising SME Award', 'Listed feed on Public Home Shopping']
+      era: 'growth',
+      eraBadgeKo: '기업 수상',
+      eraBadgeEn: 'Award & Media',
+      titleKo: '유망 중소기업 대상 및 방송 유통',
+      titleEn: 'Promising SME Award & Broadcasting',
+      itemsKo: ['유망 중소기업 대상 수상', '공영홈쇼핑 반려동물 사료 공식 방영 및 입점'],
+      itemsEn: ['Won Promising SME Award', 'Listed pet food on Public Home Shopping']
     },
     {
       year: '2017',
-      itemsKo: ['농협 하나로마트 계약', '농협 목우촌 제조위탁 계약', '국내 로얄바이츠 사료공장 설립'],
-      itemsEn: ['Contracted with NongHyup Hanaro Mart', 'Contracted manufacturing with NongHyup Mokwoochon', 'Established Royal Bites domestic feed factory']
+      era: 'growth',
+      eraBadgeKo: '제조 기반',
+      eraBadgeEn: 'Manufacturing',
+      titleKo: '국내 제조공장 설립 및 농협 파트너십',
+      titleEn: 'Factory Establishment & NongHyup Partnership',
+      itemsKo: ['농협 하나로마트 공급 계약 체결', '농협 목우촌 제조위탁 생산 계약 체결', '국내 로얄바이츠 사료공장 설립'],
+      itemsEn: ['Contracted with NongHyup Hanaro Mart', 'OEM manufacturing with Mokwoochon', 'Established domestic Royal Bites factory']
     },
     {
       year: '2008',
-      itemsKo: ['미국 월마트 수출'],
-      itemsEn: ['Exported to Walmart USA']
+      era: 'foundation',
+      eraBadgeKo: '연구개발',
+      eraBadgeEn: 'R&D Setup',
+      titleKo: 'R&D 연구소 설립',
+      titleEn: 'Establishment of R&D Center',
+      itemsKo: ['자체 연구개발(R&D) 센터 개소', '반려동물 기능성 간식 자체 배합 기술 확보'],
+      itemsEn: ['Opened in-house R&D center', 'Secured proprietary formula for functional pet treats']
     },
     {
-      year: '2006',
-      itemsKo: ['GS마트 전점 입점', '롯데슈퍼 전점 입점'],
-      itemsEn: ['Listed in all GS Mart stores', 'Listed in all Lotte Super stores']
-    },
-    {
-      year: '2002',
-      itemsKo: ['이마트 전점 입점'],
-      itemsEn: ['Listed in all E-mart stores']
+      year: '2003',
+      era: 'foundation',
+      eraBadgeKo: '물류 거점',
+      eraBadgeEn: 'Logistics Expansion',
+      titleKo: '물류 인프라 확충',
+      titleEn: 'Logistics Infrastructure Expansion',
+      itemsKo: ['수도권 메인 물류센터 확장 이전', '전국 도소매 및 대형마트 직배송 체계 구축'],
+      itemsEn: ['Relocated to larger logistics center in capital area', 'Built direct shipping network']
     },
     {
       year: '1995',
+      era: 'foundation',
+      eraBadgeKo: '창립',
+      eraBadgeEn: 'Founding',
       titleKo: '(주)부명 설립',
       titleEn: 'Establishment of BOOMYOUNG CO., LTD.',
-      itemsKo: [],
-      itemsEn: []
+      itemsKo: ['반려동물 용품 및 식품 전문 제조·유통 기업 (주)부명 설립'],
+      itemsEn: ['Founded BOOMYOUNG CO., LTD. specializing in pet food & supplies']
     }
   ];
 
+  // 3. 인프라 탭 데이터
+  const infraTabs = [
+    {
+      id: 'factory',
+      code: 'KOREA FACTORY',
+      titleKo: '사료 및 간식 공장',
+      titleEn: 'Pet Food & Snack Factory',
+      descKo: '국제 표준 식품안전 경영시스템인 ISO 22000 및 HACCP 인증을 보유한 최첨단 펫 푸드 전용 제조 시설입니다. 원료 선별부터 자동화 생산, 위생 포장까지 전 공정을 철저하게 관리합니다.',
+      descEn: 'State-of-the-art pet food facility holding ISO 22000 and HACCP certifications, strictly managing all phases from raw material selection to automated packaging.',
+      mediaType: 'image',
+      coverImage: './assets/homad/homad_01.jpg',
+      images: homadImages,
+      features: [
+        { nameKo: 'ISO 22000 인증', nameEn: 'ISO 22000 Certified', subKo: '식품안전 경영시스템', subEn: 'Food safety standard' },
+        { nameKo: 'HACCP 위해요소 관리', nameEn: 'HACCP Safety Standard', subKo: '공정별 위해 사전 차단', subEn: 'Hazard point control' },
+        { nameKo: '자동화 배합·포장', nameEn: 'Automated Line', subKo: '위생 밀폐 패키징', subEn: 'Sanitary sealed packaging' },
+        { nameKo: 'OEM/ODM 전용 라인', nameEn: 'OEM/ODM Capability', subKo: '고객 맞춤형 제형 제조', subEn: 'Custom formulation' }
+      ]
+    },
+    {
+      id: 'rnd',
+      code: 'R&D CENTER',
+      titleKo: 'R&D 연구소',
+      titleEn: 'Healthcare R&D Center',
+      descKo: '반려동물의 생애주기별 건강 특성을 과학적으로 분석하고, 고품질 기능성 원료 검증과 배합 기술 혁신을 주도하는 전문 연구 기관입니다.',
+      descEn: 'Specialized healthcare research center analyzing pet life-stages, pioneering raw material verification and functional formula innovation.',
+      mediaType: 'image',
+      coverImage: './assets/wellzen/wellzen_01.png',
+      images: wellzenImages,
+      features: [
+        { nameKo: '영양 성분 정밀 분석', nameEn: 'Nutritional Analysis', subKo: 'AAFCO 기준 준수 검증', subEn: 'AAFCO compliance audit' },
+        { nameKo: '기능성 레시피 개발', nameEn: 'Formula Engineering', subKo: '관절·피부·장 건강 특화', subEn: 'Joint, coat & gut health' },
+        { nameKo: '기호성 실증 테스트', nameEn: 'Palatability Testing', subKo: '실제 반려동물 테스트', subEn: 'Real-taste assessment' },
+        { nameKo: '신소재 특허 출원', nameEn: 'Patent Innovations', subKo: '독자 기술 지식재산권', subEn: 'Proprietary IP assets' }
+      ]
+    },
+    {
+      id: 'logistics',
+      code: 'LOGISTICS CENTER',
+      titleKo: '통합 물류센터',
+      titleEn: 'Integrated Logistics Center',
+      descKo: '실시간 재고 관리 시스템(WMS)과 최적화된 온·습도 조절 보관 인프라를 통해 전국 대형마트, 온·오프라인 파트너사 및 글로벌 공급망으로 안전하고 신속한 배송을 실현합니다.',
+      descEn: 'Real-time WMS and climate-controlled storage delivering safe, rapid distribution across nationwide hypermarkets, online channels, and global markets.',
+      mediaType: 'video',
+      coverVideo: './assets/logistics/logistics.mp4',
+      features: [
+        { nameKo: '전국 익일 배송 체계', nameEn: 'Nationwide Delivery', subKo: '대형 유통망 일일 직납', subEn: 'Daily hypermarket supply' },
+        { nameKo: '스마트 WMS 재고관리', nameEn: 'Smart WMS System', subKo: '실시간 로트·유통기한 추적', subEn: 'Real-time lot tracking' },
+        { nameKo: '항온·항습 안심 보관', nameEn: 'Climate-Controlled', subKo: '품질 유지 최적 보관', subEn: 'Optimal fresh storage' },
+        { nameKo: '글로벌 수출입 풀필먼트', nameEn: 'Global Fulfillment', subKo: '원스톱 통관 및 출고', subEn: 'One-stop export dispatch' }
+      ]
+    },
+    {
+      id: 'qingdao',
+      code: 'GLOBAL PLANT',
+      titleKo: '칭다오 글로벌 가공 공장',
+      titleEn: 'Qingdao Plant & OEM Facility',
+      descKo: '위생용품 및 글로벌 소싱 가공 OEM/ODM 전문 공장으로, 엄격한 품질 규격 아래 우수한 가격 경쟁력과 대량 생산 능력을 제공합니다.',
+      descEn: 'Global OEM/ODM processing facility for hygiene products, providing cost-efficiency and high-capacity production under strict quality compliance.',
+      mediaType: 'image',
+      coverImage: './assets/china/qingdao-factory.jpg',
+      images: qingdaoImages,
+      features: [
+        { nameKo: '글로벌 OEM/ODM 역량', nameEn: 'Global OEM/ODM', subKo: '맞춤형 대량 생산 체계', subEn: 'High-volume production' },
+        { nameKo: '위생용품 특화 라인', nameEn: 'Hygiene Essentials', subKo: '패드·위생용품 전용 라인', subEn: 'Dedicated care line' },
+        { nameKo: '원가 경쟁력 극대화', nameEn: 'Cost Optimization', subKo: '글로벌 원자재 직수급', subEn: 'Direct material sourcing' },
+        { nameKo: '글로벌 품질 검수', nameEn: 'Strict Quality Audit', subKo: '수출입 전수 품질 관리', subEn: 'Pre-shipment inspection' }
+      ]
+    }
+  ];
+
+  const currentInfra = infraTabs[activeInfraTab];
+
   return (
-    <div className="daesang-sub-page">
-      {/* 물류센터 팝업 영상을 미리 백그라운드에서 받아두어, 실제 팝업을 열 때
-          전체 용량을 그때부터 새로 받기 시작하느라 느려 보이지 않도록 함
-          (link rel=preload는 브라우저별로 video 프리로드를 지원하지 않는 경우가 있어
-          숨겨진 video 태그로 확실하게 미리 받아둠) */}
+    <div className="bm-about-page">
+      {/* 백그라운드 프리로드 비디오 */}
       <video src="./assets/logistics/logistics.mp4" preload="auto" muted style={{ display: 'none' }} />
 
-      {/* 1. 메인 서브 히어로 이미지 */}
+      {/* ====== 1. 서브 히어로 (Sub Hero) ====== */}
       <section
-        className="daesang-sub-hero"
+        className="bm-sub-hero"
         style={{
-          background: "linear-gradient(rgba(10,37,64,0.55), rgba(10,37,64,0.55)), url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=2560&q=80') center/cover no-repeat #0A2540"
+          backgroundImage: "url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=2560&q=80')"
         }}
       >
-        <div className="daesang-section-overlay"></div>
-        <div className="daesang-sub-hero-content">
-          <span className="daesang-poetic-sub">CORPORATE OVERVIEW &amp; CI</span>
-          <h1>{isEn ? 'About Us' : '회사소개'}</h1>
-          <p>
+        <div className="bm-sub-hero-overlay" />
+        <div className="bm-sub-hero-content animate-on-scroll fade-up is-visible">
+          <span className="bm-sub-hero-tag">ABOUT BOOMYOUNG</span>
+          <h1 className="bm-sub-hero-title">
             {isEn
-              ? 'Opening a happy tomorrow for pets and pet owners based on honest technology and trust accumulated over 30 years.'
-              : '30년이상 축적된 정직한 기술과 신뢰를 바탕으로 반려동물과 반려인의 행복한 내일을 열어갑니다.'}
+              ? 'Opening a Healthier Tomorrow for Pets'
+              : '반려동물과 반려인의 행복한 내일을 열어갑니다'}
+          </h1>
+          <p className="bm-sub-hero-desc">
+            {isEn
+              ? 'Built upon 30 years of honest technology, uncompromising safety protocols, and enduring customer trust.'
+              : '30년 이상 축적된 정직한 기술과 원칙 있는 품질, 견고한 신뢰를 바탕으로 펫 헬스케어의 미래를 창조합니다.'}
           </p>
         </div>
       </section>
 
-      {/* 2. CEO 메시지 */}
-      <section className="daesang-white-section">
-        <div className="daesang-container-wide">
-          <div className="daesang-sub-split">
-            <div className="daesang-sub-left">
-              <span className="daesang-brand-num">CEO MESSAGE</span>
-              <h2>{isEn ? 'Dreaming of a happy world together with pets' : '반려동물과 함께 행복한 세상을 꿈꿉니다'}</h2>
-              <div style={{ marginTop: '20px', padding: '16px', background: '#F8FAFC', borderRadius: '8px', borderLeft: '4px solid var(--dh-blue)' }}>
-                <p style={{ fontWeight: '700', fontSize: '0.92rem', color: 'var(--dh-navy)' }}>
-                  {isEn ? 'Seong-hoon Jeong, CEO' : '정성훈 대표이사'}
-                </p>
-                <p style={{ fontSize: '0.78rem', color: 'var(--dh-text-muted)', marginTop: '2px' }}>
-                  {isEn ? '(주)BOOMYOUNG CO., LTD.' : '(주)부명 대표이사'}
+      {/* ====== 2. 핵심 지표 바 (Stats Bar) ====== */}
+      <div className="bm-container">
+        <div className="bm-about-stats-bar" ref={statsRef}>
+          {statsData.map((stat, idx) => (
+            <div key={idx} className="bm-about-stat-card animate-child">
+              <div className="bm-about-stat-num">{isEn ? stat.numEn : stat.numKo}</div>
+              <div className="bm-about-stat-label">{isEn ? stat.labelEn : stat.labelKo}</div>
+              <div className="bm-about-stat-sub">{isEn ? stat.subEn : stat.subKo}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ====== 3. CEO 메시지 (CEO Message) ====== */}
+      <section className="bm-section bm-section-white">
+        <div className="bm-container">
+          <div className="bm-section-header">
+            <span className="bm-section-tag">CEO Message</span>
+            <h2 className="bm-section-title">
+              {isEn ? 'Dreaming of a World Where Pets Thrive' : '생명을 존중하는 마음에서 기술이 시작됩니다'}
+            </h2>
+            <p className="bm-section-desc">
+              {isEn
+                ? 'A warm message of dedication and integrity from CEO Seong-hoon Jeong.'
+                : '(주)부명이 추구하는 진정한 가치와 정직한 약속을 전합니다.'}
+            </p>
+          </div>
+
+          <div className="bm-ceo-split animate-on-scroll fade-up is-visible" ref={ceoRef}>
+            {/* 좌측: 블루 프로필 카드 */}
+            <div className="bm-ceo-profile-card">
+              <div>
+                <div className="bm-ceo-quote-mark">“</div>
+                <p className="bm-ceo-highlight-text">
+                  {isEn
+                    ? 'Respect begins with small and thoughtful care.'
+                    : '존중은 아주 작고 사소한 배려에서부터 시작됩니다.'}
                 </p>
               </div>
+              <div className="bm-ceo-profile-footer">
+                <div className="bm-ceo-name">{isEn ? 'Seong-hoon Jeong' : '정 성 훈'}</div>
+                <div className="bm-ceo-title">
+                  {isEn ? 'CEO, BOOMYOUNG CO., LTD.' : '(주)부명 대표이사'}
+                </div>
+              </div>
             </div>
-            <div className="daesang-sub-right">
-              <p className="daesang-lead-text">
+
+            {/* 우측: 감성 본문 카드 + 공식 서명 */}
+            <div className="bm-ceo-content-box">
+              <p className="bm-ceo-lead">
                 {isEn
                   ? 'Hello, I am Seong-hoon Jeong, CEO of BOOMYOUNG CO., LTD.'
-                  : '안녕하십니까. 부명(BOOMYOUNG CO., LTD.) 대표이사 정성훈입니다.'}
+                  : '안녕하십니까. (주)부명 대표이사 정성훈입니다.'}
               </p>
-              <p style={{ marginBottom: '14px' }}>
+              <p className="bm-ceo-body-text">
                 {isEn
-                  ? 'Under the goal of providing better products and services to both pets and pet owners, BOOMYOUNG operates across product planning, development, distribution, and logistics, centered around pet supplies.'
-                  : '부명은 반려동물과 반려인 모두에게 더 나은 제품과 서비스를 제공한다는 목표 아래 반려동물용품을 중심으로 상품 기획, 개발, 유통 및 물류 전반의 사업을 운영하고 있습니다.'}
+                  ? 'Under the conviction of providing the highest quality products and heartfelt services to both companion animals and their guardians, BOOMYOUNG has grown into a comprehensive enterprise covering product planning, scientific R&D, advanced manufacturing, and nationwide logistics.'
+                  : '부명은 반려동물과 반려인 모두에게 최상의 품질과 신뢰를 전한다는 확고한 신념 아래, 상품 기획부터 과학적인 R&D, 전문 제조 시설, 그리고 전국 물류 네트워크에 이르기까지 펫 라이프의 전 과정을 아우르는 종합 펫 헬스케어 기업으로 성장해 왔습니다.'}
               </p>
-              <p style={{ marginBottom: '14px' }}>
+              <p className="bm-ceo-body-text">
                 {isEn
-                  ? 'We closely analyze fast-changing pet market trends and consumer demands to introduce practical and high-quality products, maintaining sustainable growth built on stable partnerships with major domestic distribution channels.'
-                  : '빠르게 변화하는 반려동물 시장의 트렌드와 소비자의 요구를 면밀히 분석하여 실용성과 품질을 갖춘 제품을 선보이고, 국내 주요 유통채널과의 안정적인 협력관계를 바탕으로 지속적인 성장을 이어가고 있습니다.'}
+                  ? 'We continuously examine fast-evolving market trends and guardians’ genuine needs to introduce nutritious, reliable products. Through enduring partnerships with leading domestic retail channels such as E-mart, GS, and NongHyup, we have built sustainable momentum.'
+                  : '급변하는 반려동물 시장의 트렌드와 반려 가족의 목소리를 면밀히 분석하여 안심하고 선택할 수 있는 정직한 제품을 선보이고 있으며, 이마트, GS, 농협 등 국내 최고의 유통 파트너사들과의 두터운 신뢰를 바탕으로 지속 가능한 혁신을 이어가고 있습니다.'}
               </p>
-              <p style={{ marginBottom: '14px', position: 'relative' }}>
+              <p className="bm-ceo-body-text">
                 {isEn
-                  ? 'Going forward, we will pursue management that satisfies both stores and customers based on trust, strengthening market leadership through solid planning and high-quality manufacturing capabilities. Thank you.'
-                  : '앞으로도 신뢰를 바탕으로 하는 매장과 고객 모두가 만족할 수 있는 경영을 지향하며, 알찬 기획과 고품질 제조 역량으로 시장 지배력을 강화하고 가치 있는 미래를 만들어 가겠습니다. 감사합니다.'}
+                  ? 'We pledge to uphold management that satisfies both retail partners and end consumers, fortifying market leadership through relentless innovation and unwavering respect for pet life. Thank you.'
+                  : '앞으로도 협력 매장과 소비자 모두가 깊이 공감하고 신뢰할 수 있는 상생 경영을 지향하며, 엄격한 품질 관리와 차별화된 제조 역량으로 반려동물의 건강하고 행복한 삶을 지키는 든든한 동반자가 되겠습니다. 감사합니다.'}
+              </p>
+
+              {/* 공식 대표이사 서명 */}
+              <div className="bm-ceo-signature-wrap">
+                <span className="bm-ceo-sign-label">
+                  {isEn ? 'Chief Executive Officer' : '대표이사'}
+                </span>
                 <img
                   src="./assets/ceo_signature.png"
                   alt={isEn ? 'CEO Signature' : '대표이사 서명'}
-                  style={{
-                    position: 'absolute',
-                    height: '60px',
-                    objectFit: 'contain',
-                    right: isEn ? '-10px' : '-18px',
-                    bottom: '-22px',
-                    pointerEvents: 'none'
-                  }}
+                  className="bm-ceo-signature-img"
                 />
-              </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 3. 연혁 (History) */}
-      <section className="daesang-gray-section">
-        <div className="daesang-container-wide">
-          <h2 className="daesang-section-h2">
-            {isEn ? 'Company History' : '기업 연혁'}
-          </h2>
-          <div className="daesang-timeline">
-            {historyItems.map((item, index) => {
+      {/* ====== 4. 기업 연혁 (Interactive Filterable Timeline) ====== */}
+      <section className="bm-section bm-section-light">
+        <div className="bm-container">
+          <div className="bm-timeline-header-wrap">
+            <div>
+              <span className="bm-section-tag">History</span>
+              <h2 className="bm-section-title">
+                {isEn ? 'Our 30-Year Journey' : '도전과 신뢰의 30년 발자취'}
+              </h2>
+              <p className="bm-section-desc">
+                {isEn
+                  ? 'Tracing the milestones of growth, manufacturing excellence, and distribution dominance since 1995.'
+                  : '1995년 창립 이래 오늘날 대한민국 펫 산업의 중심으로 성장하기까지의 여정입니다.'}
+              </p>
+            </div>
+          </div>
+
+          {/* 타임라인 컨테이너 */}
+          <div className="bm-timeline-container" ref={timelineRef}>
+            {historyItems.map((item, idx) => {
               const title = isEn ? item.titleEn : item.titleKo;
               const items = isEn ? item.itemsEn : item.itemsKo;
+              const badge = isEn ? item.eraBadgeEn : item.eraBadgeKo;
+
               return (
-                <div key={index} className="daesang-timeline-item">
-                  <span className="timeline-dot" />
-                  <span className="timeline-year">{item.year}</span>
-                  <div className="timeline-content">
-                    {title && <h4>{title}</h4>}
-                    {items.length > 1 ? (
-                      <ul className="timeline-list">
-                        {items.map((line, i) => <li key={i}>{line}</li>)}
-                      </ul>
-                    ) : items.length === 1 ? (
-                      <p>{items[0]}</p>
-                    ) : null}
+                <div key={idx} className="bm-timeline-row animate-child">
+                  {/* 중앙 연결 노드 */}
+                  <div className="bm-timeline-node" />
+
+                  {/* 카드 본체 */}
+                  <div className="bm-timeline-card-side">
+                    <div className="bm-timeline-card">
+                      <div className="bm-timeline-card-header">
+                        <span className="bm-timeline-year-tag">{item.year}</span>
+                        <span className="bm-timeline-era-badge">{badge}</span>
+                      </div>
+                      {title && <h3 className="bm-timeline-title">{title}</h3>}
+                      {items.length > 1 ? (
+                        <ul className="bm-timeline-list">
+                          {items.map((line, i) => (
+                            <li key={i}>{line}</li>
+                          ))}
+                        </ul>
+                      ) : items.length === 1 ? (
+                        <p style={{ margin: 0, fontSize: '0.88rem', color: '#64748B', lineHeight: '1.6' }}>
+                          {items[0]}
+                        </p>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               );
@@ -210,184 +461,260 @@ export default function About() {
         </div>
       </section>
 
-      {/* 4. 인프라 */}
-      <section className="daesang-white-section">
-        <div className="daesang-container-wide">
-          <h2 className="daesang-section-h2">
-            {isEn ? 'Infrastructure' : '생산 및 R&D 인프라'}
-          </h2>
-          <div className="daesang-trust-grid">
-            <div className="daesang-trust-card" onClick={() => { setGalleryImages(homadImages); setGalleryIndex(0); }} style={{ cursor: 'pointer' }}>
-              <span className="trust-code">KOREA FACTORY</span>
-              <h3>{isEn ? 'Homad Pet Food & Snack Factory' : '호마드 사료 및 간식 공장'}</h3>
-              <p>
-                {isEn
-                  ? 'Pet food and food manufacturing facility holding ISO 22000 and HACCP certifications.'
-                  : '반려동물 사료 및 식품 제조공장으로 ISO 22000 및 HACCP 인증을 보유하고 있습니다.'}
-              </p>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <span style={{ fontSize: '0.72rem', padding: '3px 8px', background: '#EBF5FF', color: 'var(--dh-blue)', borderRadius: '4px', fontWeight: '600' }}>ISO 22000</span>
-                <span style={{ fontSize: '0.72rem', padding: '3px 8px', background: '#EBF5FF', color: 'var(--dh-blue)', borderRadius: '4px', fontWeight: '600' }}>HACCP</span>
+      {/* ====== 5. 생산 및 R&D 인프라 (Infrastructure Showcase) ====== */}
+      <section className="bm-section bm-section-white">
+        <div className="bm-container">
+          <div className="bm-section-header" style={{ textAlign: 'center' }}>
+            <span className="bm-section-tag">Infrastructure</span>
+            <h2 className="bm-section-title">
+              {isEn ? 'Manufacturing & Innovation Facilities' : '자체 생산 및 연구개발 인프라'}
+            </h2>
+            <p className="bm-section-desc" style={{ margin: '0 auto' }}>
+              {isEn
+                ? 'Certified manufacturing facilities and specialized healthcare research leading global pet nutrition standards.'
+                : 'ISO 22000·HACCP 인증 공장부터 첨단 R&D 연구소까지, 타협 없는 품질을 실현하는 인프라를 소개합니다.'}
+            </p>
+          </div>
+
+          {/* 상단 4개 인프라 선택 카드 (구 하단 미니 카드를 상단으로 이동) */}
+          <div className="bm-infra-mini-grid" style={{ marginBottom: '28px', marginTop: '0' }}>
+            {infraTabs.map((tab, idx) => (
+              <div
+                key={tab.id}
+                className={`bm-infra-mini-card ${activeInfraTab === idx ? 'active' : ''}`}
+                onClick={() => setActiveInfraTab(idx)}
+              >
+                <div className="bm-infra-mini-header">
+                  <span className="bm-infra-mini-code">{tab.code}</span>
+                  <span style={{ fontSize: '0.8rem', color: activeInfraTab === idx ? 'var(--bm-primary)' : '#CBD5E1' }}>
+                    {activeInfraTab === idx ? '●' : '○'}
+                  </span>
+                </div>
+                <div className="bm-infra-mini-title">
+                  {isEn ? tab.titleEn : tab.titleKo}
+                </div>
               </div>
+            ))}
+          </div>
+
+          {/* 메인 상세 쇼케이스 카드 */}
+          <div className="bm-infra-showcase animate-on-scroll fade-up is-visible" ref={infraRef}>
+            {/* 좌측 미디어 (이미지 슬라이드 로테이션 or 비디오) */}
+            <div
+              className="bm-infra-showcase-media"
+              onClick={() => {
+                if (currentInfra.mediaType === 'video') {
+                  setShowLogisticsVideo(true);
+                } else if (currentInfra.images) {
+                  setGalleryImages(currentInfra.images);
+                  setGalleryIndex(infraSlideIdx);
+                }
+              }}
+              title={
+                currentInfra.mediaType === 'video'
+                  ? (isEn ? 'Click to watch logistics video' : '클릭하여 물류센터 영상을 시청하세요')
+                  : (isEn ? 'Click to view photo gallery' : '클릭하여 사진 갤러리를 확대해 보세요')
+              }
+            >
+              {currentInfra.mediaType === 'video' ? (
+                <video autoPlay muted loop playsInline>
+                  <source src={currentInfra.coverVideo} type="video/mp4" />
+                </video>
+              ) : currentInfra.images && currentInfra.images.length > 1 ? (
+                <>
+                  {currentInfra.images.map((src, idx) => (
+                    <img
+                      key={src}
+                      src={src}
+                      alt={`${currentInfra.titleKo} ${idx + 1}`}
+                      className={`bm-infra-showcase-slide ${idx === infraSlideIdx ? 'active' : ''}`}
+                    />
+                  ))}
+                  <div className="bm-infra-slide-indicators">
+                    {currentInfra.images.map((_, idx) => (
+                      <span
+                        key={idx}
+                        className={`bm-infra-indicator ${idx === infraSlideIdx ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setInfraSlideIdx(idx);
+                        }}
+                      />
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <img src={currentInfra.coverImage} alt={currentInfra.titleKo} />
+              )}
             </div>
 
-            <div className="daesang-trust-card" onClick={() => { setGalleryImages(wellzenImages); setGalleryIndex(0); }} style={{ cursor: 'pointer' }}>
-              <span className="trust-code">R&amp;D CENTER</span>
-              <h3>{isEn ? 'Wellzen R&D Center' : '웰젠 R&D 연구소'}</h3>
-              <p>
-                {isEn
-                  ? 'Specialized pet healthcare research center leading raw material verification and processing technology development.'
-                  : '반려동물 전용 헬스케어 전문 연구소로 고품질 원료 검증 및 가공 기술 개발을 주도합니다.'}
+            {/* 우측 설명 및 특징 그리드 */}
+            <div className="bm-infra-showcase-details">
+              <span className="bm-infra-showcase-code">{currentInfra.code}</span>
+              <h3 className="bm-infra-showcase-title">
+                {isEn ? currentInfra.titleEn : currentInfra.titleKo}
+              </h3>
+              <p className="bm-infra-showcase-desc">
+                {isEn ? currentInfra.descEn : currentInfra.descKo}
               </p>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <span style={{ fontSize: '0.72rem', padding: '3px 8px', background: '#EBF5FF', color: 'var(--dh-blue)', borderRadius: '4px', fontWeight: '600' }}>{isEn ? 'Healthcare R&D' : '헬스케어 R&D'}</span>
-                <span style={{ fontSize: '0.72rem', padding: '3px 8px', background: '#EBF5FF', color: 'var(--dh-blue)', borderRadius: '4px', fontWeight: '600' }}>{isEn ? 'Raw Material Tech' : '원료가공 기술'}</span>
-              </div>
-            </div>
 
-            <div className="daesang-trust-card" onClick={() => setShowLogisticsVideo(true)} style={{ cursor: 'pointer' }}>
-              <span className="trust-code">LOGISTICS CENTER</span>
-              <h3>{isEn ? 'Integrated Logistics Center' : '통합 물류센터'}</h3>
-              <p>
-                {isEn
-                  ? 'Systematic inventory management and an optimized logistics system deliver a safe, fast nationwide distribution network.'
-                  : '체계적인 재고 관리와 최적화된 물류 시스템을 통해 안전하고 신속한 전국 배송 네트워크를 제공합니다.'}
-              </p>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <span style={{ fontSize: '0.72rem', padding: '3px 8px', background: '#EBF5FF', color: 'var(--dh-blue)', borderRadius: '4px', fontWeight: '600' }}>{isEn ? 'Nationwide Network' : '전국 공급망'}</span>
-                <span style={{ fontSize: '0.72rem', padding: '3px 8px', background: '#EBF5FF', color: 'var(--dh-blue)', borderRadius: '4px', fontWeight: '600' }}>{isEn ? 'Global Network' : '글로벌 공급망'}</span>
-              </div>
-            </div>
-
-            <div className="daesang-trust-card" onClick={() => { setGalleryImages(qingdaoImages); setGalleryIndex(0); }} style={{ cursor: 'pointer' }}>
-              <span className="trust-code">GLOBAL NETWORK</span>
-              <h3>{isEn ? 'Qingdao Plant' : '칭다오 공장'}</h3>
-              <p>
-                {isEn
-                  ? 'Hygiene products & global processing OEM/ODM facility.'
-                  : '위생용품 및 글로벌 가공 OEM/ODM 공장입니다.'}
-              </p>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <span style={{ fontSize: '0.72rem', padding: '3px 8px', background: '#FEF3C7', color: '#B45309', borderRadius: '4px', fontWeight: '600' }}>{isEn ? 'Hygiene Products' : '위생용품'}</span>
-                <span style={{ fontSize: '0.72rem', padding: '3px 8px', background: '#FEF3C7', color: '#B45309', borderRadius: '4px', fontWeight: '600' }}>{isEn ? 'Global OEM/ODM' : '글로벌 OEM/ODM'}</span>
+              {/* 특징 그리드 */}
+              <div className="bm-infra-features-grid">
+                {currentInfra.features.map((feat, i) => (
+                  <div key={i} className="bm-infra-feature-item">
+                    <div className="bm-infra-feature-name">{isEn ? feat.nameEn : feat.nameKo}</div>
+                    <div className="bm-infra-feature-sub">{isEn ? feat.subEn : feat.subKo}</div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 5. CI 소개 (좌측 대형 CI 로고 + 우측 3개 분할 섹션 레이아웃) */}
-      <section className="daesang-white-section">
-        <div className="daesang-container-wide">
-          <h2 className="daesang-section-h2">
-            {isEn ? 'Corporate Identity' : 'CI 소개'}
-          </h2>
-          
-          <div className="ci-section-grid" style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '32px', alignItems: 'stretch' }}>
-            {/* 좌측: 대형 CI 로고 박스 */}
-            <div className="ci-logo-card" style={{
-              background: '#FFFFFF',
-              border: '1px solid var(--dh-border)',
-              borderRadius: '12px',
-              padding: '36px 24px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
-              textAlign: 'center'
-            }}>
+      {/* ====== 6. CI 소개 (Corporate Identity System) ====== */}
+      <section className="bm-section bm-section-light">
+        <div className="bm-container">
+          <div className="bm-section-header">
+            <span className="bm-section-tag">Corporate Identity</span>
+            <h2 className="bm-section-title">
+              {isEn ? 'Identity of Trust & Global Vision' : '신뢰와 비전을 담은 CI 시스템'}
+            </h2>
+            <p className="bm-section-desc">
+              {isEn
+                ? 'The official corporate symbol representing 30 years of integrity, safety, and respect for pet life.'
+                : '고객과의 깊은 신뢰와 생명 존중의 철학을 담아낸 (주)부명의 시각적 정체성입니다.'}
+            </p>
+          </div>
+
+          <div className="bm-ci-container animate-on-scroll fade-up is-visible" ref={ciRef}>
+            {/* 좌측: 대형 CI 로고 쇼케이스 + 다운로드 */}
+            <div className="bm-ci-symbol-stage">
               <img
                 src="./assets/boomyung_ci_logo.png"
                 alt="BOOMYOUNG Corporate Identity"
-                style={{ maxHeight: '90px', maxWidth: '100%', objectFit: 'contain', marginBottom: '20px' }}
+                className="bm-ci-logo-img"
               />
-              <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--dh-blue)', letterSpacing: '0.04em', marginBottom: '4px' }}>
-                (주)부명 BOOMYOUNG
-              </h3>
-              <p style={{ fontSize: '0.78rem', color: 'var(--dh-text-muted)', fontWeight: '500' }}>
-                Corporate Identity System
-              </p>
+              <div className="bm-ci-brand-name">
+                {isEn ? 'BOOMYOUNG CO., LTD.' : '(주)부명 BOOMYOUNG'}
+              </div>
+              <div className="bm-ci-brand-en">
+                Official Corporate Identity System
+              </div>
+              <a
+                href="./assets/boomyung_ci_logo.png"
+                download="boomyung_ci_logo.png"
+                className="bm-ci-download-btn"
+                title={isEn ? 'Download CI Logo PNG' : 'CI 로고 이미지 다운로드'}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                {isEn ? 'Download Logo' : '로고 다운로드 (PNG)'}
+              </a>
             </div>
 
-            {/* 우측: 3개 수직 분할 설명 섹션 */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {/* 섹션 1: 심볼마크 의미 */}
-              <div className="ci-info-card" style={{
-                background: '#F8FAFC',
-                border: '1px solid var(--dh-border)',
-                borderLeft: '4px solid var(--dh-blue)',
-                borderRadius: '8px',
-                padding: '20px 24px'
-              }}>
-                <div className="ci-info-header" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--dh-blue)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>01. Symbol Mark</span>
-                  <h4 style={{ fontSize: '0.92rem', fontWeight: '700', color: 'var(--dh-navy)' }}>
-                    {isEn ? 'Symbolization of Trust & Life' : '심볼마크의 상징성'}
+            {/* 우측: 3대 핵심 의미 카드 스택 + 컬러 팔레트 */}
+            <div className="bm-ci-cards-stack">
+              {/* 카드 1 */}
+              <div className="bm-ci-card">
+                <div className="bm-ci-card-header">
+                  <span className="bm-ci-card-num">01. SYMBOL MARK</span>
+                  <h4 className="bm-ci-card-title">
+                    {isEn ? 'Symbol of Trust & Sacred Life' : '신뢰와 생명 존중의 상징'}
                   </h4>
                 </div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--dh-text-muted)', lineHeight: '1.55' }}>
+                <p className="bm-ci-card-desc">
                   {isEn
-                    ? 'The logo mark symbolizes solid trust with customers, scientific quality inspection, and deep respect for all pet lives.'
-                    : '부명의 CI 심볼은 고객 및 파트너사와의 견고한 신뢰, 과학적인 품질 검증, 그리고 모든 반려동물 생명에 대한 깊은 존중을 상징합니다.'}
+                    ? 'The dynamic mark represents unwavering trust with consumers and partners, rigorous scientific quality inspection, and profound reverence for companion animals.'
+                    : '부명의 CI 심볼은 반려 가족 및 파트너사와의 견고한 신뢰, 타협 없는 과학적 품질 검증, 그리고 소중한 반려동물 생명에 대한 깊은 존중과 책임을 상징합니다.'}
                 </p>
               </div>
 
-              {/* 섹션 2: 핵심 가치 */}
-              <div className="ci-info-card" style={{
-                background: '#F8FAFC',
-                border: '1px solid var(--dh-border)',
-                borderLeft: '4px solid var(--dh-blue)',
-                borderRadius: '8px',
-                padding: '20px 24px'
-              }}>
-                <div className="ci-info-header" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--dh-blue)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>02. Core Value</span>
-                  <h4 style={{ fontSize: '0.92rem', fontWeight: '700', color: 'var(--dh-navy)' }}>
+              {/* 카드 2 */}
+              <div className="bm-ci-card">
+                <div className="bm-ci-card-header">
+                  <span className="bm-ci-card-num">02. CORE VALUE</span>
+                  <h4 className="bm-ci-card-title">
                     {isEn ? '30 Years of Honest Technology' : '30년 정직한 기술과 혁신'}
                   </h4>
                 </div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--dh-text-muted)', lineHeight: '1.55' }}>
+                <p className="bm-ci-card-desc">
                   {isEn
-                    ? 'Reflecting 30 years of accumulated manufacturing expertise and continuous innovation to lead the global pet healthcare market.'
-                    : '30년 이상 축적된 정직한 제조 기술력을 바탕으로 고품질 원료 검증과 가공 기술 혁신을 주도하여 가치 있는 미래를 열어갑니다.'}
+                    ? 'Synthesizing over 30 years of accumulated manufacturing mastery and forward-looking healthcare R&D to spearhead global pet wellness.'
+                    : '30년 이상 축적된 전문 제조 노하우와 선진 헬스케어 가공 기술을 융합하여, 언제나 정직하고 안전한 제품만을 선보이겠다는 약속을 담고 있습니다.'}
                 </p>
               </div>
 
-              {/* 섹션 3: 컬러 시스템 */}
-              <div className="ci-info-card" style={{
-                background: '#F8FAFC',
-                border: '1px solid var(--dh-border)',
-                borderLeft: '4px solid var(--dh-blue)',
-                borderRadius: '8px',
-                padding: '20px 24px'
-              }}>
-                <div className="ci-info-header" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--dh-blue)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>03. Color System</span>
-                  <h4 style={{ fontSize: '0.92rem', fontWeight: '700', color: 'var(--dh-navy)' }}>
-                    {isEn ? 'Corporate Blue Color (#0066B3)' : '시그니처 블루 컬러 (#0066B3)'}
+              {/* 카드 3: 컬러 시스템 & 팔레트 칩 */}
+              <div className="bm-ci-card">
+                <div className="bm-ci-card-header">
+                  <span className="bm-ci-card-num">03. COLOR SYSTEM</span>
+                  <h4 className="bm-ci-card-title">
+                    {isEn ? 'Boomyoung Signature Palette' : '시그니처 컬러 시스템'}
                   </h4>
                 </div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--dh-text-muted)', lineHeight: '1.55' }}>
+                <p className="bm-ci-card-desc">
                   {isEn
-                    ? 'Main color #0066B3 signifies deep trust, honesty, and technological innovation expanding across the globe like the vast blue ocean.'
-                    : '부명 대표 메인 블루 컬러(#0066B3)는 깊은 신뢰와 정직, 기술 혁신을 의미하며 푸른 바다처럼 넓은 세계로 뻗어나가는 (주)부명의 도전 정신을 상징합니다.'}
+                    ? 'Boomyoung Blue (#0066B3) conveys absolute trust and technological vitality expanding like the ocean. Navy (#0A2540) symbolizes corporate stability and heritage.'
+                    : '대표 색상인 부명 블루(#0066B3)는 투명한 신뢰와 혁신적인 생명력을 상징하며, 네이비(#0A2540)는 흔들림 없는 기업 안정성과 30년의 헤리티지를 나타냅니다.'}
                 </p>
+
+                {/* 컬러 칩 팔레트 */}
+                <div className="bm-ci-palette">
+                  <div className="bm-color-chip">
+                    <div className="bm-color-swatch" style={{ background: '#0066B3' }} />
+                    <div className="bm-color-info">
+                      <span className="bm-color-name">Boomyoung Blue</span>
+                      <span className="bm-color-code">#0066B3 (Primary)</span>
+                    </div>
+                  </div>
+                  <div className="bm-color-chip">
+                    <div className="bm-color-swatch" style={{ background: '#0A2540' }} />
+                    <div className="bm-color-info">
+                      <span className="bm-color-name">Deep Navy</span>
+                      <span className="bm-color-code">#0A2540 (Heritage)</span>
+                    </div>
+                  </div>
+                  <div className="bm-color-chip">
+                    <div className="bm-color-swatch" style={{ background: '#00A3E0' }} />
+                    <div className="bm-color-info">
+                      <span className="bm-color-name">Cyan Accent</span>
+                      <span className="bm-color-code">#00A3E0 (Innovation)</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* SECTION: 물류센터 소개 영상 팝업 */}
+      {/* ====== 7. 물류센터 소개 영상 모달 ====== */}
       {showLogisticsVideo && (
         <div className="modal-backdrop" onClick={() => setShowLogisticsVideo(false)}>
           <div
             className="modal-content"
             onClick={e => e.stopPropagation()}
-            style={{ maxWidth: '860px', width: '90%', background: '#000000', padding: 0, borderRadius: '10px', overflow: 'hidden' }}
+            style={{
+              maxWidth: '860px',
+              width: '92%',
+              background: '#000000',
+              padding: 0,
+              borderRadius: '16px',
+              overflow: 'hidden',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.5)'
+            }}
           >
-            <button className="modal-close-btn" onClick={() => setShowLogisticsVideo(false)} style={{ position: 'fixed', top: '24px', right: '32px' }}>&times;</button>
+            <button
+              className="modal-close-btn"
+              onClick={() => setShowLogisticsVideo(false)}
+              style={{ position: 'fixed', top: '24px', right: '32px' }}
+            >
+              &times;
+            </button>
             <video
               src="./assets/logistics/logistics.mp4"
               controls
@@ -398,18 +725,24 @@ export default function About() {
         </div>
       )}
 
-      {/* SECTION: 인프라 카드 클릭 시 나오는 이미지 확대(라이트박스) 팝업 - 이전/다음 이동 가능 */}
+      {/* ====== 8. 사진 라이트박스 갤러리 모달 ====== */}
       {galleryImages && (
         <div className="modal-backdrop" onClick={closeGallery}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <button className="modal-close-btn" onClick={closeGallery}>&times;</button>
-            <img src={galleryImages[galleryIndex]} alt="" />
+            <img src={galleryImages[galleryIndex]} alt="Facility Gallery" />
             {galleryImages.length > 1 && (
               <div className="modal-caption">
-                <span style={{ fontSize: '0.85rem', color: '#AAA' }}>{galleryIndex + 1} / {galleryImages.length}</span>
+                <span style={{ fontSize: '0.85rem', color: '#AAA' }}>
+                  {galleryIndex + 1} / {galleryImages.length}
+                </span>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button className="modal-nav-btn" onClick={prevGalleryImage}>&larr; {isEn ? 'Prev' : '이전'}</button>
-                  <button className="modal-nav-btn" onClick={nextGalleryImage}>{isEn ? 'Next' : '다음'} &rarr;</button>
+                  <button className="modal-nav-btn" onClick={prevGalleryImage}>
+                    &larr; {isEn ? 'Prev' : '이전'}
+                  </button>
+                  <button className="modal-nav-btn" onClick={nextGalleryImage}>
+                    {isEn ? 'Next' : '다음'} &rarr;
+                  </button>
                 </div>
               </div>
             )}

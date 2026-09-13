@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <rect x="10" y="10" width="140" height="140" rx="28" fill="#1E3A8A" stroke="#3B82F6" stroke-width="3" />
+  <circle cx="80" cy="56" r="30" fill="#2563EB" />
+  <!-- Dog and Cat silhouette stylized -->
+  <path d="M68 64 C68 52 74 46 80 46 C86 46 92 52 92 64 Z" fill="#FFFFFF" />
+  <circle cx="75" cy="52" r="3" fill="#1E3A8A" />
+  <circle cx="85" cy="52" r="3" fill="#1E3A8A" />
+  <!-- AAFCO Text -->
+  <rect x="22" y="100" width="116" height="34" rx="8" fill="#FFFFFF" />
+  <text x="80" y="124" font-family="'Inter', -apple-system, sans-serif" font-size="18" font-weight="900" fill="#1E3A8A" text-anchor="middle" letter-spacing="2">AAFCO</text>
+  <text x="80" y="86" font-family="'Inter', sans-serif" font-size="9" font-weight="700" fill="#93C5FD" text-anchor="middle">NUTRIENT PROFILE</text>
+</svg>
