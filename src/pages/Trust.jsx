@@ -38,7 +38,6 @@ export default function Trust() {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(null);
   const [selectedCert, setSelectedCert] = useState(null);
   const [selectedPatent, setSelectedPatent] = useState(null);
-  const [activeSection, setActiveSection] = useState('certs');
 
   // ESC 키로 모달 닫기
   useEffect(() => {
@@ -60,17 +59,6 @@ export default function Trust() {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [selectedPhotoIndex, selectedCert, selectedPatent]);
-
-  // 부드러운 스크롤 이동 함수
-  const scrollToSection = (id) => {
-    setActiveSection(id);
-    const el = document.getElementById(id);
-    if (el) {
-      const yOffset = -90;
-      const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: 'smooth' });
-    }
-  };
 
   // 인증서 목록 데이터 (ISO 14001, ISO 22000, HACCP, AAFCO)
   const certifications = [

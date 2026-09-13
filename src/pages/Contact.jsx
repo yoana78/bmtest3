@@ -6,7 +6,7 @@
 // 4. B2B 파트너십 FAQ (자주 묻는 질문 아코디언)
 // 5. 국내외 유통 파트너사 신뢰 바
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useData } from '../context/DataContext';
 import { usePageContent } from '../content/usePageContent';

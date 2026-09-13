@@ -63,15 +63,6 @@ export default function Home() {
   const marqueePartners = [...partners, ...partners];
   const marqueePetRetailPartners = [...petRetailPartners, ...petRetailPartners];
 
-  // Map brand origins for imported brands
-  const originMap = {
-    ninaottosson: isEn ? 'Sweden' : '스웨덴',
-    dono: isEn ? 'China' : '중국',
-    reflex: isEn ? 'Turkey' : '터키',
-    sulfodene: isEn ? 'USA' : '미국',
-    petstage: isEn ? 'USA' : '미국',
-  };
-
   // 인프라 섹션 이미지 갤러리 및 비디오 모달 상태
   const homadImages = [
     './assets/homad/homad_01.jpg',

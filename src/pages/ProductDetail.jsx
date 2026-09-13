@@ -217,8 +217,12 @@ export default function ProductDetail() {
             {/* SECTION: "원료 및 성분" 탭 내용 - 원료 설명과 영양성분표 */}
             {activeTab === 'nutrition' && (
               <div className="nutrition-tab">
-                <h3>{isEn ? 'Main Ingredients' : '사용 원료'}</h3>
-                <p className="ingredients-text">{ingredientsText || (isEn ? 'No ingredient information available.' : '원료 정보가 없습니다.')}</p>
+                {ingredientsText && (
+                  <>
+                    <h3>{isEn ? 'Main Ingredients' : '사용 원료'}</h3>
+                    <p className="ingredients-text">{ingredientsText}</p>
+                  </>
+                )}
 
                 {showNutrition && (
                   <>

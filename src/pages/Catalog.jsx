@@ -162,25 +162,19 @@ export default function Catalog() {
   }, [products, selectedCategory, selectedBrand, searchQuery, brands]);
 
   // 정렬 처리
+  // 언어를 전환해도 목록 순서가 그대로 유지되도록, 이름 정렬은 항상 한글명(nameKo)을 기준으로 비교한다
+  // (영문명 기준으로 비교하면 같은 "이름순" 정렬이어도 언어별 알파벳 순서가 달라 상품 순서가 뒤바뀌어 보였음)
   const sortedProducts = useMemo(() => {
     const list = [...filteredProducts];
     if (sortBy === 'nameAsc') {
-      list.sort((a, b) => {
-        const nameA = isEn ? (a.nameEn || a.nameKo) : a.nameKo;
-        const nameB = isEn ? (b.nameEn || b.nameKo) : b.nameKo;
-        return nameA.localeCompare(nameB, isEn ? 'en' : 'ko');
-      });
+      list.sort((a, b) => a.nameKo.localeCompare(b.nameKo, 'ko'));
     } else if (sortBy === 'nameDesc') {
-      list.sort((a, b) => {
-        const nameA = isEn ? (a.nameEn || a.nameKo) : a.nameKo;
-        const nameB = isEn ? (b.nameEn || b.nameKo) : b.nameKo;
-        return nameB.localeCompare(nameA, isEn ? 'en' : 'ko');
-      });
+      list.sort((a, b) => b.nameKo.localeCompare(a.nameKo, 'ko'));
     } else if (sortBy === 'code') {
       list.sort((a, b) => (a.code || '').localeCompare(b.code || ''));
     }
     return list;
-  }, [filteredProducts, sortBy, isEn]);
+  }, [filteredProducts, sortBy]);
 
   // 페이지네이션 처리
   const totalPages = Math.ceil(sortedProducts.length / ITEMS_PER_PAGE) || 1;
