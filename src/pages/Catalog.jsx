@@ -133,7 +133,9 @@ export default function Catalog() {
   const handleOpenModal = (e, product) => {
     e.preventDefault();
     setModalProduct(product);
-    setModalTab('info');
+    const feats = isEn ? (product.featuresEn || product.features || []) : (product.features || []);
+    const featsList = Array.isArray(feats) ? feats : (typeof feats === 'string' ? feats.split('\n') : []);
+    setModalTab(featsList.length > 0 ? 'info' : 'nutrition');
   };
 
   // 필터 조건에 따른 제품 리스트
@@ -643,12 +645,14 @@ export default function Catalog() {
               {/* 하단 탭: 제품 특징 / 원료 및 성분 */}
               <div>
                 <div className="bm-modal-tabs">
-                  <button
-                    className={`bm-modal-tab-btn ${modalTab === 'info' ? 'active' : ''}`}
-                    onClick={() => setModalTab('info')}
-                  >
-                    {isEn ? 'Features & Details' : '제품 핵심 특징'}
-                  </button>
+                  {modalFeaturesList.length > 0 && (
+                    <button
+                      className={`bm-modal-tab-btn ${modalTab === 'info' ? 'active' : ''}`}
+                      onClick={() => setModalTab('info')}
+                    >
+                      {isEn ? 'Features & Details' : '제품 핵심 특징'}
+                    </button>
+                  )}
                   {(modalNutritionEntries.length > 0 || modalProduct.ingredients) && (
                     <button
                       className={`bm-modal-tab-btn ${modalTab === 'nutrition' ? 'active' : ''}`}
@@ -660,24 +664,16 @@ export default function Catalog() {
                 </div>
 
                 <div className="bm-modal-tab-panel">
-                  {modalTab === 'info' && (
+                  {modalTab === 'info' && modalFeaturesList.length > 0 && (
                     <div>
-                      {modalFeaturesList.length > 0 ? (
-                        <ul className="bm-modal-features-list">
-                          {modalFeaturesList.map((feat, idx) => (
-                            <li key={idx} className="bm-modal-feature-item">
-                              <span className="bm-modal-check-icon">✓</span>
-                              <span>{feat}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p style={{ color: '#64748B', fontSize: '0.92rem', padding: '10px 0' }}>
-                          {isEn
-                            ? 'Specialized formula crafted to ensure high quality and pet health.'
-                            : '반려동물의 건강과 안전을 위해 엄선된 원료로 생산된 정품입니다.'}
-                        </p>
-                      )}
+                      <ul className="bm-modal-features-list">
+                        {modalFeaturesList.map((feat, idx) => (
+                          <li key={idx} className="bm-modal-feature-item">
+                            <span className="bm-modal-check-icon">✓</span>
+                            <span>{feat}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   )}
 
