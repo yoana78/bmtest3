@@ -1166,33 +1166,40 @@ h1, h2, h3, h4, h5, h6, p, span, a, label {
 }
 
 /* ===== 메가메뉴 드롭다운 (CJ 말풍선 스타일) ===== */
+/* 바깥 .bm-mega-menu는 버튼 바로 아래(top:100%)부터 시작해서 padding-top으로 말풍선과의 여백을 만든다.
+   여백을 top 오프셋으로 띄우면 그 틈이 호버 영역 밖이 되어 마우스가 지나갈 때 메뉴가 먼저 닫혀버리므로,
+   여백 자체를 이 요소의 padding(=호버 영역 안쪽)으로 넣어 틈이 없게 만든다. */
 .bm-mega-menu {
   position: absolute;
-  top: calc(100% + 12px);
+  top: 100%;
   left: 50%;
-  transform: translateX(-50%) translateY(8px);
-  background: #FFFFFF;
-  border-radius: 16px;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
-  padding: 24px 28px;
+  transform: translateX(-50%) translateY(-4px);
+  padding-top: 12px;
   min-width: 480px;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
   z-index: 100;
   pointer-events: none;
+}
+
+.bm-mega-menu-bubble {
+  position: relative;
+  background: #FFFFFF;
+  border-radius: 16px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  padding: 24px 28px;
   text-shadow: none !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* 말풍선 화살표 */
-.bm-mega-menu::before {
+.bm-mega-menu-bubble::before {
   content: '';
   position: absolute;
   top: -8px;
   left: 50%;
-  transform: translateX(-50%);
   width: 16px;
   height: 16px;
   background: #FFFFFF;

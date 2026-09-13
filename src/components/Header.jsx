@@ -67,30 +67,34 @@ export default function Header() {
           >
             {isEn ? 'Brands' : '브랜드'}
             <div className="bm-mega-menu" onClick={(e) => e.stopPropagation()}>
-              <div className="bm-mega-menu-title">{isEn ? 'OUR BRANDS' : '자체 브랜드'}</div>
-              <div className="bm-mega-menu-grid">
-                {ownBrands.map(b => (
-                  <Link key={b.id} to={`/brands/${b.id}`} className="bm-mega-menu-item">
-                    {b.logo && <img src={b.logo} alt={b.nameKo} />}
-                    <span className="mega-item-name">{isEn ? (b.nameEn || b.nameKo) : b.nameKo}</span>
-                  </Link>
-                ))}
+              {/* 버튼과 말풍선 사이 여백(bm-mega-menu의 padding-top)도 이 안쪽 래퍼 밖이라 호버 영역에 포함됨 —
+                  그 틈으로 마우스가 지나갈 때 :hover가 끊겨 팝업이 먼저 닫혀버리는 문제를 막기 위함 */}
+              <div className="bm-mega-menu-bubble">
+                <div className="bm-mega-menu-title">{isEn ? 'OUR BRANDS' : '자체 브랜드'}</div>
+                <div className="bm-mega-menu-grid">
+                  {ownBrands.map(b => (
+                    <Link key={b.id} to={`/brands/${b.id}`} className="bm-mega-menu-item">
+                      {b.logo && <img src={b.logo} alt={b.nameKo} style={{ transform: `scale(${b.logoScale || 1})` }} />}
+                      <span className="mega-item-name">{isEn ? (b.nameEn || b.nameKo) : b.nameKo}</span>
+                    </Link>
+                  ))}
+                </div>
+                {importedBrands.length > 0 && (
+                  <>
+                    <div className="bm-mega-menu-title" style={{ marginTop: '18px' }}>
+                      {isEn ? 'IMPORTED BRANDS' : '수입 브랜드'}
+                    </div>
+                    <div className="bm-mega-menu-grid">
+                      {importedBrands.map(b => (
+                        <Link key={b.id} to={`/imported-brands/${b.id}`} className="bm-mega-menu-item">
+                          {b.logo && <img src={b.logo} alt={b.nameKo} style={{ transform: `scale(${b.logoScale || 1})` }} />}
+                          <span className="mega-item-name">{isEn ? (b.nameEn || b.nameKo) : b.nameKo}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
-              {importedBrands.length > 0 && (
-                <>
-                  <div className="bm-mega-menu-title" style={{ marginTop: '18px' }}>
-                    {isEn ? 'IMPORTED BRANDS' : '수입 브랜드'}
-                  </div>
-                  <div className="bm-mega-menu-grid">
-                    {importedBrands.map(b => (
-                      <Link key={b.id} to={`/imported-brands/${b.id}`} className="bm-mega-menu-item">
-                        {b.logo && <img src={b.logo} alt={b.nameKo} />}
-                        <span className="mega-item-name">{isEn ? (b.nameEn || b.nameKo) : b.nameKo}</span>
-                      </Link>
-                    ))}
-                  </div>
-                </>
-              )}
             </div>
           </NavLink>
 
@@ -146,7 +150,7 @@ export default function Header() {
               className="bm-mobile-sub-item"
               onClick={() => setMobileOpen(false)}
             >
-              {b.logo && <img src={b.logo} alt={b.nameKo} />}
+              {b.logo && <img src={b.logo} alt={b.nameKo} style={{ transform: `scale(${b.logoScale || 1})` }} />}
               <span>{isEn ? (b.nameEn || b.nameKo) : b.nameKo}</span>
             </Link>
           ))}

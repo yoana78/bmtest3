@@ -96,7 +96,7 @@ export default function ProductDetail() {
                   }}
                 />
               ) : brand?.hasLogo ? (
-                <img src={brand.logo} alt={brand.nameEn} style={{ maxHeight: '110px', maxWidth: '240px', objectFit: 'contain' }} />
+                <img src={brand.logo} alt={brand.nameEn} style={{ maxHeight: '110px', maxWidth: '240px', objectFit: 'contain', transform: `scale(${brand.logoScale || 1})` }} />
               ) : (
                 <span className="product-icon-large" style={{ color: brandColor, fontSize: '2.5rem', fontWeight: '800' }}>
                   {brand?.nameEn || brand?.nameKo}

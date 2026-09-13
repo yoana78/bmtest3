@@ -397,7 +397,7 @@ export default function Home() {
                     style={{ '--card-accent': b.color }}
                   >
                     <div className="bm-brand-zigzag-logo">
-                      {b.logo && <img src={b.logo} alt={b.nameKo} />}
+                      {b.logo && <img src={b.logo} alt={b.nameKo} style={{ transform: `scale(${b.logoScale || 1})` }} />}
                     </div>
                     <div className="bm-brand-zigzag-info">
                       <h3 className="bm-brand-zigzag-name">
@@ -474,7 +474,7 @@ export default function Home() {
                 className="bm-imported-card animate-child"
               >
                 <div className="bm-imported-card-logo">
-                  {b.logo && <img src={b.logo} alt={b.nameKo} />}
+                  {b.logo && <img src={b.logo} alt={b.nameKo} style={{ transform: `scale(${b.logoScale || 1})` }} />}
                 </div>
                 <h3 className="bm-imported-card-name">
                   {isEn ? (b.nameEn || b.nameKo) : b.nameKo}
