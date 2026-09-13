@@ -1,7 +1,7 @@
 // 리뉴얼 헤더 컴포넌트.
 // 투명→화이트 전환 + 메가메뉴 드롭다운 + 모바일 드로어 메뉴.
 import React, { useState, useEffect } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useData } from '../context/DataContext';
 
@@ -11,6 +11,15 @@ export default function Header() {
   const { brands } = useData();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+
+  // 메가메뉴 안의 링크를 클릭해 라우트가 바뀌어도 SPA 특성상 클릭된 링크에 포커스가 남아
+  // :focus-within이 계속 참이 되면서 팝업이 안 닫히는 문제 방지 — 라우트 변경 시 포커스 해제
+  useEffect(() => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  }, [location.pathname]);
 
   // 자체 브랜드 / 수입 브랜드 분리
   const ownBrands = brands.filter(b => b.type === 'own');
