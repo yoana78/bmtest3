@@ -2,16 +2,19 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useData } from '../context/DataContext';
-import { partners } from '../data/partners';
-import { petRetailPartners } from '../data/petRetailPartners';
 import { products } from '../data/products';
 import { useScrollAnimation, useStaggerAnimation } from '../hooks/useScrollAnimation';
+import { usePageContent } from '../content/usePageContent';
+import { useSiteList } from '../content/siteLists';
 import b2bBuildingImg from '../assets/b2b_building.jpg';
 
 export default function Home() {
   const { lang } = useLanguage();
   const isEn = lang === 'en';
   const { brands } = useData();
+  const { txt } = usePageContent('home');
+  const partners = useSiteList('partners');
+  const petRetailPartners = useSiteList('petRetailPartners');
 
   const ownBrands = brands.filter(b => b.type === 'own');
   const importedBrands = brands.filter(b => b.type === 'imported');
@@ -24,9 +27,7 @@ export default function Home() {
   }, []);
 
   // 히어로 타이틀 타이핑 효과
-  const fullHeroTitle = isEn
-    ? 'Respect begins with small and thoughtful care.'
-    : '존중은 아주 작고\n사소한 것에서부터\n시작됩니다';
+  const fullHeroTitle = txt('heroTitle');
 
   const [typedTitle, setTypedTitle] = useState('');
   const [isTypingComplete, setIsTypingComplete] = useState(false);
@@ -153,7 +154,7 @@ export default function Home() {
         {/* 비디오 위 텍스트 컨테이너 */}
         <div className="bm-hero-text-container">
           <div className="bm-hero-content">
-            <span className="bm-hero-sub">Respect for Pet Life</span>
+            <span className="bm-hero-sub">{txt('heroSub')}</span>
             <h1 className="bm-hero-title">
               {typedTitle.split('\n').map((line, idx, arr) => (
                 <React.Fragment key={idx}>
@@ -163,13 +164,11 @@ export default function Home() {
               ))}
               {!isTypingComplete && <span className="bm-typing-cursor" />}
             </h1>
-            <p className="bm-hero-desc">
-              {isEn
-                ? 'BOOMYUNG creates a healthier future for pets through uncompromised quality and transparent craftsmanship.'
-                : '(주)부명은 반려동물의 생명과 건강을 존중하는 정직한 품질로 펫 헬스케어의 미래를 열어갑니다.'}
+            <p className="bm-hero-desc" style={{ whiteSpace: 'pre-line' }}>
+              {txt('heroBody')}
             </p>
             <Link to="/brands" className="bm-hero-cta">
-              <span>{isEn ? 'Explore Brands' : '브랜드 포트폴리오'}</span>
+              <span>{txt('heroButton')}</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12" />
                 <polyline points="12 5 19 12 12 19" />
@@ -189,14 +188,12 @@ export default function Home() {
       <section className="bm-section bm-section-light bm-infra-section">
         <div className="bm-container">
           <div className="bm-section-header" style={{ marginBottom: '36px' }}>
-            <span className="bm-section-tag">INFRASTRUCTURE &amp; R&amp;D</span>
+            <span className="bm-section-tag">{txt('infraEyebrow')}</span>
             <h2 className="bm-section-title">
-              {isEn ? 'Production & R&D Infrastructure' : '생산 및 R&D 인프라'}
+              {txt('infraTitle')}
             </h2>
-            <p className="bm-section-desc">
-              {isEn
-                ? 'Certified manufacturing facilities, specialized research, and nationwide logistics supporting premium quality.'
-                : '엄격한 품질 인증을 획득한 제조시설과 전문 연구소, 첨단 물류 시스템으로 안전하고 신뢰할 수 있는 제품을 공급합니다.'}
+            <p className="bm-section-desc" style={{ whiteSpace: 'pre-line' }}>
+              {txt('infraBody')}
             </p>
           </div>
 
@@ -388,14 +385,12 @@ export default function Home() {
         <div className="bm-container">
           {/* 섹션 상단 공통 헤더 */}
           <div className="bm-section-header" style={{ marginBottom: '36px' }}>
-            <span className="bm-section-tag">Core Brands &amp; Products</span>
+            <span className="bm-section-tag">{txt('coreEyebrow')}</span>
             <h2 className="bm-section-title">
-              {isEn ? 'Our Brands & Best Products' : '부명 핵심 브랜드 & 대표 상품'}
+              {txt('coreTitle')}
             </h2>
-            <p className="bm-section-desc">
-              {isEn
-                ? 'Specialized pet care brands and verified bestseller lineup built on science and trust.'
-                : '과학과 신뢰로 만든 부명의 대표 펫 케어 브랜드와 엄선된 베스트셀러 제품 라인업입니다.'}
+            <p className="bm-section-desc" style={{ whiteSpace: 'pre-line' }}>
+              {txt('coreBody')}
             </p>
           </div>
 
@@ -472,14 +467,12 @@ export default function Home() {
       <section className="bm-section bm-section-light">
         <div className="bm-container">
           <div className="bm-section-header">
-            <span className="bm-section-tag">Imported Brands</span>
+            <span className="bm-section-tag">{txt('importedEyebrow')}</span>
             <h2 className="bm-section-title">
-              {isEn ? 'Global Brand Partners' : '세계에서 엄선한 수입 브랜드'}
+              {txt('importedTitle')}
             </h2>
-            <p className="bm-section-desc">
-              {isEn
-                ? 'Carefully selected premium brands from around the world.'
-                : '전 세계에서 엄선한 프리미엄 펫 브랜드를 국내에 소개합니다.'}
+            <p className="bm-section-desc" style={{ whiteSpace: 'pre-line' }}>
+              {txt('importedBody')}
             </p>
           </div>
           <div className="bm-imported-grid" ref={importedSectionRef}>
@@ -506,15 +499,13 @@ export default function Home() {
         {/* 국내 대형 유통 파트너 */}
         <div className="bm-marquee-header">
           <span className="bm-section-tag" style={{ textAlign: 'center', display: 'block' }}>
-            {isEn ? 'TRUSTED BY MAJOR RETAIL NETWORKS' : 'TRUSTED BY MAJOR RETAIL NETWORKS'}
+            TRUSTED BY MAJOR RETAIL NETWORKS
           </span>
           <h2 className="bm-section-title" style={{ textAlign: 'center' }}>
-            {isEn ? 'Major Retail Partners with BOOMYUNG' : '부명과 함께하는 국내 대형 유통 파트너'}
+            {txt('retailTitle')}
           </h2>
-          <p className="bm-section-desc" style={{ textAlign: 'center', margin: '0 auto' }}>
-            {isEn
-              ? 'Supplying verified products to major retail networks including E-Mart, Homeplus, Costco, Coupang, and convenience stores.'
-              : '이마트, 홈플러스, 코스트코, 쿠팡, 편의점 4사 등 국내 13개 이상 유통 채널에 검증된 제품을 공급합니다.'}
+          <p className="bm-section-desc" style={{ textAlign: 'center', margin: '0 auto', whiteSpace: 'pre-line' }}>
+            {txt('retailBody')}
           </p>
         </div>
 
@@ -523,7 +514,7 @@ export default function Home() {
           <div className="bm-marquee-track">
             {marqueePartners.map((p, idx) => (
               <div key={`${p.id}-${idx}`} className="bm-marquee-item bm-marquee-item-retail" title={isEn ? p.nameEn : p.nameKo}>
-                <img src={p.logo} alt={p.nameKo} />
+                <img src={p.logo} alt={p.nameKo} style={{ transform: `scale(${Number(p.logoScale) || 1})` }} />
               </div>
             ))}
           </div>
@@ -532,15 +523,13 @@ export default function Home() {
         {/* 국내 펫 전문 유통사 */}
         <div className="bm-marquee-header" style={{ marginTop: '56px', marginBottom: '28px' }}>
           <span className="bm-section-tag" style={{ textAlign: 'center', display: 'block' }}>
-            {isEn ? 'TRUSTED BY PET SPECIALTY DISTRIBUTORS' : 'TRUSTED BY PET SPECIALTY DISTRIBUTORS'}
+            TRUSTED BY PET SPECIALTY DISTRIBUTORS
           </span>
           <h2 className="bm-section-title" style={{ textAlign: 'center' }}>
-            {isEn ? 'Pet Specialty Distributors' : '부명과 함께 하는 국내 펫 전문 유통사'}
+            {txt('petRetailTitle')}
           </h2>
-          <p className="bm-section-desc" style={{ textAlign: 'center', margin: '0 auto' }}>
-            {isEn
-              ? 'Supplying premium pet products to leading pet specialty distributors including Seonjin Pet, Kkio, Dog & Cat Paradise, and THE KICO.'
-              : '선진펫, 꼬기오, 야옹아멍멍해봐, 더 키코 등 국내 대형 펫 유통 채널에 검증된 제품을 공급합니다.'}
+          <p className="bm-section-desc" style={{ textAlign: 'center', margin: '0 auto', whiteSpace: 'pre-line' }}>
+            {txt('petRetailBody')}
           </p>
         </div>
 
@@ -550,7 +539,7 @@ export default function Home() {
             {marqueePetRetailPartners.map((p, idx) => (
               <div key={`pet-${p.id}-${idx}`} className="bm-marquee-item bm-marquee-item-pet" title={isEn ? p.nameEn : p.nameKo}>
                 {p.logo ? (
-                  <img src={p.logo} alt={p.nameKo} />
+                  <img src={p.logo} alt={p.nameKo} style={{ transform: `scale(${Number(p.logoScale) || 1})` }} />
                 ) : (
                   <span style={{ fontSize: '0.66rem', color: '#CBD5E1', fontWeight: 600 }}>
                     {isEn ? 'Coming Soon' : '로고 추가 예정'}
@@ -569,16 +558,12 @@ export default function Home() {
             {/* 좌측: 빌딩 배경 + 타이틀 영역 */}
             <div className="bm-b2b-left" style={{ backgroundImage: `url(${b2bBuildingImg})` }}>
               <div className="bm-b2b-left-content">
-                <span className="bm-b2b-tag">BUSINESS PARTNERSHIP</span>
-                <h2 className="bm-b2b-title">
-                  {isEn
-                    ? 'Partner with BOOMYUNG for Premium Pet Products'
-                    : '부명과 함께하는\n비즈니스 파트너십'}
+                <span className="bm-b2b-tag">{txt('b2bTag')}</span>
+                <h2 className="bm-b2b-title" style={{ whiteSpace: 'pre-line' }}>
+                  {txt('b2bTitle')}
                 </h2>
-                <p className="bm-b2b-desc">
-                  {isEn
-                    ? 'From domestic retail to global exports, we expand reliable partnerships with proven pet care products.'
-                    : '국내 대형 유통망부터 글로벌 수출까지, 검증된 펫 케어 제품으로 파트너십을 확장합니다.'}
+                <p className="bm-b2b-desc" style={{ whiteSpace: 'pre-line' }}>
+                  {txt('b2bBody')}
                 </p>
               </div>
             </div>
@@ -645,13 +630,11 @@ export default function Home() {
 
           {/* 하단: Image 4 스타일 안내 문구 및 문의 버튼 */}
           <div className="bm-b2b-bottom">
-            <p className="bm-b2b-bottom-text">
-              {isEn
-                ? 'We partner with major discount hypermarkets, e-commerce, global buyers, OEM/ODM, and overseas export. Let us know your requirements.'
-                : '대형 할인마트, 이커머스, 글로벌 바이어와 OEM/ODM 및 수출 파트너십을 진행합니다. 필요한 내용을 알려주세요.'}
+            <p className="bm-b2b-bottom-text" style={{ whiteSpace: 'pre-line' }}>
+              {txt('b2bBottomText')}
             </p>
             <Link to="/contact" className="bm-b2b-bottom-btn">
-              <span>{isEn ? 'B2B Inquiries' : 'B2B 문의하기'}</span>
+              <span>{txt('b2bButton')}</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12" />
                 <polyline points="12 5 19 12 12 19" />

@@ -8,6 +8,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useScrollAnimation, useStaggerAnimation } from '../hooks/useScrollAnimation';
+import { usePageContent } from '../content/usePageContent';
+import { useSiteList } from '../content/siteLists';
 
 // 인프라 섹션 이미지 데이터
 const wellzenImages = [
@@ -30,6 +32,8 @@ const qingdaoImages = [
 export default function About() {
   const { lang } = useLanguage();
   const isEn = lang === 'en';
+  const { txt, img } = usePageContent('about');
+  const historyItems = useSiteList('history');
 
   // 갤러리 및 비디오 팝업 상태
   const [galleryImages, setGalleryImages] = useState(null);
@@ -110,110 +114,6 @@ export default function About() {
       labelEn: 'Manufacturing Infra',
       subKo: '사료·간식·위생용품 자체 인프라',
       subEn: 'Pet food, snack & care tech'
-    }
-  ];
-
-  // 2. 회사 연혁 데이터 (시대별 분류 추가)
-  const historyItems = [
-    {
-      year: '2024 ~ Present',
-      era: 'recent',
-      eraBadgeKo: '도약 및 글로벌화',
-      eraBadgeEn: 'Global Expansion',
-      titleKo: '글로벌 네트워크 및 자체 브랜드 고도화',
-      titleEn: 'Global Network & Brand Elevation',
-      itemsKo: ['사료 및 간식 공장 전용 라인 확장', 'R&D 연구소 첨단 분석 체계 구축', '글로벌 OEM/ODM 공급 체인 다변화'],
-      itemsEn: ['Dedicated pet food/snack production lines', 'Established advanced R&D analysis center', 'Diversified global OEM/ODM supply network']
-    },
-    {
-      year: '2023',
-      era: 'recent',
-      eraBadgeKo: '품질 인증',
-      eraBadgeEn: 'Quality Cert',
-      titleKo: '품질 인증 및 제조 혁신',
-      titleEn: 'Quality Certification & Innovation',
-      itemsKo: ['ISO 22000 및 HACCP 인증 획득', '전용 자동화 생산 설비 및 멸균 포장 라인 도입'],
-      itemsEn: ['Obtained ISO 22000 & HACCP certifications', 'Introduced automated production & packaging line']
-    },
-    {
-      year: '2021',
-      era: 'recent',
-      eraBadgeKo: '유통 채널',
-      eraBadgeEn: 'Omni-channel',
-      titleKo: '온·오프라인 옴니채널 입점',
-      titleEn: 'Omni-channel Network Expansion',
-      itemsKo: ['요기요 즉시배송 서비스 입점', 'CJ홈쇼핑 프리미엄 사료 론칭', '자체 프리미엄 브랜드 "하우펫" 런칭'],
-      itemsEn: ['Listed on Yogiyo delivery', 'Launched on CJ Home Shopping', 'Launched "HOWPET" premium brand']
-    },
-    {
-      year: '2020',
-      era: 'growth',
-      eraBadgeKo: '유통 확장',
-      eraBadgeEn: 'Retail Growth',
-      titleKo: '전국 편의점 및 이커머스 입점',
-      titleEn: 'C-Store & E-Commerce Entry',
-      itemsKo: ['이마트24 전국 전점 입점', '마켓컬리 샛별배송 공식 입점'],
-      itemsEn: ['Supplying all E-mart24 stores', 'Listed on Market Kurly']
-    },
-    {
-      year: '2019',
-      era: 'growth',
-      eraBadgeKo: '유통 확장',
-      eraBadgeEn: 'Retail Growth',
-      titleKo: '대형 유통망 공급 확대',
-      titleEn: 'Major Supermarket Expansion',
-      itemsKo: ['킴스클럽 25개점 입점', '메가마트 12개점 입점'],
-      itemsEn: ['Listed in 25 Kim\'s Club stores', 'Listed in 12 Megamart stores']
-    },
-    {
-      year: '2018',
-      era: 'growth',
-      eraBadgeKo: '기업 수상',
-      eraBadgeEn: 'Award & Media',
-      titleKo: '유망 중소기업 대상 및 방송 유통',
-      titleEn: 'Promising SME Award & Broadcasting',
-      itemsKo: ['유망 중소기업 대상 수상', '공영홈쇼핑 반려동물 사료 공식 방영 및 입점'],
-      itemsEn: ['Won Promising SME Award', 'Listed pet food on Public Home Shopping']
-    },
-    {
-      year: '2017',
-      era: 'growth',
-      eraBadgeKo: '제조 기반',
-      eraBadgeEn: 'Manufacturing',
-      titleKo: '국내 제조공장 설립 및 농협 파트너십',
-      titleEn: 'Factory Establishment & NongHyup Partnership',
-      itemsKo: ['농협 하나로마트 공급 계약 체결', '농협 목우촌 제조위탁 생산 계약 체결', '국내 로얄바이츠 사료공장 설립'],
-      itemsEn: ['Contracted with NongHyup Hanaro Mart', 'OEM manufacturing with Mokwoochon', 'Established domestic Royal Bites factory']
-    },
-    {
-      year: '2008',
-      era: 'foundation',
-      eraBadgeKo: '연구개발',
-      eraBadgeEn: 'R&D Setup',
-      titleKo: 'R&D 연구소 설립',
-      titleEn: 'Establishment of R&D Center',
-      itemsKo: ['자체 연구개발(R&D) 센터 개소', '반려동물 기능성 간식 자체 배합 기술 확보'],
-      itemsEn: ['Opened in-house R&D center', 'Secured proprietary formula for functional pet treats']
-    },
-    {
-      year: '2003',
-      era: 'foundation',
-      eraBadgeKo: '물류 거점',
-      eraBadgeEn: 'Logistics Expansion',
-      titleKo: '물류 인프라 확충',
-      titleEn: 'Logistics Infrastructure Expansion',
-      itemsKo: ['수도권 메인 물류센터 확장 이전', '전국 도소매 및 대형마트 직배송 체계 구축'],
-      itemsEn: ['Relocated to larger logistics center in capital area', 'Built direct shipping network']
-    },
-    {
-      year: '1995',
-      era: 'foundation',
-      eraBadgeKo: '창립',
-      eraBadgeEn: 'Founding',
-      titleKo: '(주)부명 설립',
-      titleEn: 'Establishment of BOOMYOUNG CO., LTD.',
-      itemsKo: ['반려동물 용품 및 식품 전문 제조·유통 기업 (주)부명 설립'],
-      itemsEn: ['Founded BOOMYOUNG CO., LTD. specializing in pet food & supplies']
     }
   ];
 
@@ -299,21 +199,17 @@ export default function About() {
       <section
         className="bm-sub-hero"
         style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=2560&q=80')"
+          backgroundImage: `url('${img('heroImage')}')`
         }}
       >
         <div className="bm-sub-hero-overlay" />
         <div className="bm-sub-hero-content animate-on-scroll fade-up is-visible">
-          <span className="bm-sub-hero-tag">ABOUT BOOMYOUNG</span>
-          <h1 className="bm-sub-hero-title">
-            {isEn
-              ? 'Opening a Healthier Tomorrow for Pets'
-              : '반려동물과 반려인의 행복한 내일을 열어갑니다'}
+          <span className="bm-sub-hero-tag">{txt('heroEyebrow')}</span>
+          <h1 className="bm-sub-hero-title" style={{ whiteSpace: 'pre-line' }}>
+            {txt('heroTitle')}
           </h1>
-          <p className="bm-sub-hero-desc">
-            {isEn
-              ? 'Built upon 30 years of honest technology, uncompromising safety protocols, and enduring customer trust.'
-              : '30년 이상 축적된 정직한 기술과 원칙 있는 품질, 견고한 신뢰를 바탕으로 펫 헬스케어의 미래를 창조합니다.'}
+          <p className="bm-sub-hero-desc" style={{ whiteSpace: 'pre-line' }}>
+            {txt('heroBody')}
           </p>
         </div>
       </section>
@@ -335,14 +231,12 @@ export default function About() {
       <section className="bm-section bm-section-white">
         <div className="bm-container">
           <div className="bm-section-header">
-            <span className="bm-section-tag">CEO Message</span>
+            <span className="bm-section-tag">{txt('ceoEyebrow')}</span>
             <h2 className="bm-section-title">
-              {isEn ? 'Dreaming of a World Where Pets Thrive' : '생명을 존중하는 마음에서 기술이 시작됩니다'}
+              {txt('ceoSectionTitle')}
             </h2>
-            <p className="bm-section-desc">
-              {isEn
-                ? 'A warm message of dedication and integrity from CEO Seong-hoon Jeong.'
-                : '(주)부명이 추구하는 진정한 가치와 정직한 약속을 전합니다.'}
+            <p className="bm-section-desc" style={{ whiteSpace: 'pre-line' }}>
+              {txt('ceoSectionBody')}
             </p>
           </div>
 
@@ -352,15 +246,13 @@ export default function About() {
               <div>
                 <div className="bm-ceo-quote-mark">“</div>
                 <p className="bm-ceo-highlight-text">
-                  {isEn
-                    ? 'Respect begins with small and thoughtful care.'
-                    : '존중은 아주 작고 사소한 배려에서부터 시작됩니다.'}
+                  {txt('ceoHighlight')}
                 </p>
               </div>
               <div className="bm-ceo-profile-footer">
-                <div className="bm-ceo-name">{isEn ? 'Seong-hoon Jeong' : '정 성 훈'}</div>
+                <div className="bm-ceo-name">{txt('ceoName')}</div>
                 <div className="bm-ceo-title">
-                  {isEn ? 'CEO, BOOMYOUNG CO., LTD.' : '(주)부명 대표이사'}
+                  {txt('ceoTitleText')}
                 </div>
               </div>
             </div>
@@ -368,25 +260,11 @@ export default function About() {
             {/* 우측: 감성 본문 카드 + 공식 서명 */}
             <div className="bm-ceo-content-box">
               <p className="bm-ceo-lead">
-                {isEn
-                  ? 'Hello, I am Seong-hoon Jeong, CEO of BOOMYOUNG CO., LTD.'
-                  : '안녕하십니까. (주)부명 대표이사 정성훈입니다.'}
+                {txt('ceoLead')}
               </p>
-              <p className="bm-ceo-body-text">
-                {isEn
-                  ? 'Under the conviction of providing the highest quality products and heartfelt services to both companion animals and their guardians, BOOMYOUNG has grown into a comprehensive enterprise covering product planning, scientific R&D, advanced manufacturing, and nationwide logistics.'
-                  : '부명은 반려동물과 반려인 모두에게 최상의 품질과 신뢰를 전한다는 확고한 신념 아래, 상품 기획부터 과학적인 R&D, 전문 제조 시설, 그리고 전국 물류 네트워크에 이르기까지 펫 라이프의 전 과정을 아우르는 종합 펫 헬스케어 기업으로 성장해 왔습니다.'}
-              </p>
-              <p className="bm-ceo-body-text">
-                {isEn
-                  ? 'We continuously examine fast-evolving market trends and guardians’ genuine needs to introduce nutritious, reliable products. Through enduring partnerships with leading domestic retail channels such as E-mart, GS, and NongHyup, we have built sustainable momentum.'
-                  : '급변하는 반려동물 시장의 트렌드와 반려 가족의 목소리를 면밀히 분석하여 안심하고 선택할 수 있는 정직한 제품을 선보이고 있으며, 이마트, GS, 농협 등 국내 최고의 유통 파트너사들과의 두터운 신뢰를 바탕으로 지속 가능한 혁신을 이어가고 있습니다.'}
-              </p>
-              <p className="bm-ceo-body-text">
-                {isEn
-                  ? 'We pledge to uphold management that satisfies both retail partners and end consumers, fortifying market leadership through relentless innovation and unwavering respect for pet life. Thank you.'
-                  : '앞으로도 협력 매장과 소비자 모두가 깊이 공감하고 신뢰할 수 있는 상생 경영을 지향하며, 엄격한 품질 관리와 차별화된 제조 역량으로 반려동물의 건강하고 행복한 삶을 지키는 든든한 동반자가 되겠습니다. 감사합니다.'}
-              </p>
+              {txt('ceoBody').split('\n\n').map((para, idx) => (
+                <p className="bm-ceo-body-text" key={idx}>{para}</p>
+              ))}
 
               {/* 공식 대표이사 서명 */}
               <div className="bm-ceo-signature-wrap">
@@ -409,14 +287,12 @@ export default function About() {
         <div className="bm-container">
           <div className="bm-timeline-header-wrap">
             <div>
-              <span className="bm-section-tag">History</span>
+              <span className="bm-section-tag">{txt('historyEyebrow')}</span>
               <h2 className="bm-section-title">
-                {isEn ? 'Our 30-Year Journey' : '도전과 신뢰의 30년 발자취'}
+                {txt('historyTitle')}
               </h2>
-              <p className="bm-section-desc">
-                {isEn
-                  ? 'Tracing the milestones of growth, manufacturing excellence, and distribution dominance since 1995.'
-                  : '1995년 창립 이래 오늘날 대한민국 펫 산업의 중심으로 성장하기까지의 여정입니다.'}
+              <p className="bm-section-desc" style={{ whiteSpace: 'pre-line' }}>
+                {txt('historyBody')}
               </p>
             </div>
           </div>
@@ -576,14 +452,12 @@ export default function About() {
       <section className="bm-section bm-section-light">
         <div className="bm-container">
           <div className="bm-section-header">
-            <span className="bm-section-tag">Corporate Identity</span>
+            <span className="bm-section-tag">{txt('ciEyebrow')}</span>
             <h2 className="bm-section-title">
-              {isEn ? 'Identity of Trust & Global Vision' : '신뢰와 비전을 담은 CI 시스템'}
+              {txt('ciTitle')}
             </h2>
-            <p className="bm-section-desc">
-              {isEn
-                ? 'The official corporate symbol representing 30 years of integrity, safety, and respect for pet life.'
-                : '고객과의 깊은 신뢰와 생명 존중의 철학을 담아낸 (주)부명의 시각적 정체성입니다.'}
+            <p className="bm-section-desc" style={{ whiteSpace: 'pre-line' }}>
+              {txt('ciBody')}
             </p>
           </div>
 

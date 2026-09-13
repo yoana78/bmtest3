@@ -9,6 +9,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useData } from '../context/DataContext';
+import { usePageContent } from '../content/usePageContent';
+import { useSiteList } from '../content/siteLists';
 import b2bBuildingImg from '../assets/b2b_building.jpg';
 
 const WEB3FORMS_ACCESS_KEY = '8207939c-fd68-4c59-ae20-62ea022b6952';
@@ -17,6 +19,8 @@ export default function Contact() {
   const { lang } = useLanguage();
   const isEn = lang === 'en';
   const { brands, siteSettings } = useData();
+  const { txt } = usePageContent('contact');
+  const businessCards = useSiteList('businessCards');
 
   // 폼 입력값 상태
   const [formData, setFormData] = useState({
@@ -113,45 +117,7 @@ export default function Contact() {
     }
   };
 
-  // 영업 담당자 명함 데이터
-  const salesTeams = [
-    {
-      id: 'team1',
-      teamNameKo: '영업 1팀',
-      teamNameEn: 'Sales Team 1',
-      scopePillKo: '국내 유통 · 대형마트 입점',
-      scopePillEn: 'Domestic Retail Distribution',
-      personNameKo: '서 상 덕',
-      personNameEn: 'Sang-deok Seo',
-      personTitleKo: '팀장 / 차장',
-      personTitleEn: 'Head of Domestic Sales / Senior Manager',
-      descKo: '이커머스 및 국내 대형 펫 유통망 입점 총괄',
-      descEn: 'Account executive for e-commerce and major pet retail networks in Korea.',
-      phone: '010-9427-8005',
-      tel: '031-594-9916',
-      email: 'sdfamily1@hanmail.net',
-      imgKr: './assets/business_cards/team2_kr.png',
-      imgEn: './assets/business_cards/team2_en.png'
-    },
-    {
-      id: 'team2',
-      teamNameKo: '영업 2팀',
-      teamNameEn: 'Sales Team 2',
-      scopePillKo: '글로벌 해외 수출 · OEM / ODM',
-      scopePillEn: 'Global Export & OEM/ODM',
-      personNameKo: '배 상 화',
-      personNameEn: 'Sang-hwa Bae',
-      personTitleKo: '부장',
-      personTitleEn: 'Director of Global Partnerships',
-      descKo: '글로벌 독점 유통권 라이선싱, 펫 푸드 및 용품 OEM/ODM/PB 제조 위탁 총괄',
-      descEn: 'Leads global exports across 15+ countries, international distributor licensing, and proprietary OEM/ODM formulations.',
-      phone: '010-3702-8003',
-      tel: '031-553-8003',
-      email: 'shnsj@boomyung.com',
-      imgKr: './assets/business_cards/team1_kr.png',
-      imgEn: './assets/business_cards/team1_en.png'
-    }
-  ];
+  // 영업 담당자 명함 데이터는 관리자 페이지에서 추가/수정 가능한 목록(siteLists.js)에서 가져온다 (위의 useSiteList('businessCards'))
 
   // FAQ 목록 데이터
   const faqs = [
@@ -192,14 +158,12 @@ export default function Contact() {
       >
         <div className="bm-sub-hero-overlay" />
         <div className="bm-sub-hero-content animate-on-scroll fade-up is-visible">
-          <span className="bm-sub-hero-tag">PARTNERSHIP & GLOBAL SALES</span>
+          <span className="bm-sub-hero-tag">{txt('heroEyebrow')}</span>
           <h1 className="bm-sub-hero-title">
-            {isEn ? 'Contact Us & Sales Routing' : 'B2B 입점 및 영업 제휴 문의'}
+            {txt('heroTitle')}
           </h1>
-          <p className="bm-sub-hero-desc">
-            {isEn
-              ? 'Connect directly with BOOMYUNG for domestic retail distribution, global export licensing, and proprietary OEM/ODM partnerships.'
-              : '(주)부명과 함께 성장할 국내 대형마트·이커머스 입점, 글로벌 수출 및 독자 특허 기반 OEM/ODM 맞춤 제조 상담을 환영합니다.'}
+          <p className="bm-sub-hero-desc" style={{ whiteSpace: 'pre-line' }}>
+            {txt('heroBody')}
           </p>
         </div>
       </section>
@@ -221,14 +185,12 @@ export default function Contact() {
         {/* ====== 2. 부명 전담 영업팀 & 본사 안내 (좌: 본사 안내 / 우: 영업팀 명함 위아래) ====== */}
         <section style={{ marginBottom: '90px' }}>
           <div className="bm-contact-section-head">
-            <span className="bm-contact-tag">SALES TEAM & HEADQUARTERS</span>
+            <span className="bm-contact-tag">{txt('teamEyebrow')}</span>
             <h2 className="bm-contact-title">
-              {isEn ? 'Sales Team & Headquarters' : '부명 전담 영업팀'}
+              {txt('teamTitle')}
             </h2>
-            <p className="bm-contact-desc">
-              {isEn
-                ? 'Check our headquarters location and specialized sales teams for domestic distribution and global export licensing. Hover over a business card to view it enlarged in the center.'
-                : '부명 본사 안내 및 국내 유통·해외 수출 전담 영업팀을 소개합니다. 명함에 마우스를 올리시면 화면 중앙에 크게 확대되어 보여집니다.'}
+            <p className="bm-contact-desc" style={{ whiteSpace: 'pre-line' }}>
+              {txt('teamBody')}
             </p>
           </div>
 
@@ -247,10 +209,8 @@ export default function Contact() {
                 <div className="bm-hq-info-item">
                   <div className="bm-hq-info-text">
                     <span className="bm-hq-info-label">{isEn ? 'Office Address' : '본사 소재지'}</span>
-                    <span className="bm-hq-info-val">
-                      {isEn
-                        ? '306, 19, Geonwon-daero 34beon-gil, Guri-si, Gyeonggi-do, Korea'
-                        : '경기도 구리시 건원대로34번길 19, 306호 (주)부명'}
+                    <span className="bm-hq-info-val" style={{ whiteSpace: 'pre-line' }}>
+                      {txt('hqAddress')}
                     </span>
                   </div>
                 </div>
@@ -258,14 +218,14 @@ export default function Contact() {
                 <div className="bm-hq-info-item">
                   <div className="bm-hq-info-text">
                     <span className="bm-hq-info-label">{isEn ? 'Telephone' : '대표 전화'}</span>
-                    <span className="bm-hq-info-val">031-553-8003</span>
+                    <span className="bm-hq-info-val">{txt('hqTel')}</span>
                   </div>
                 </div>
 
                 <div className="bm-hq-info-item">
                   <div className="bm-hq-info-text">
                     <span className="bm-hq-info-label">{isEn ? 'Fax' : '팩스 번호'}</span>
-                    <span className="bm-hq-info-val">031-592-2460</span>
+                    <span className="bm-hq-info-val">{txt('hqFax')}</span>
                   </div>
                 </div>
 
@@ -279,7 +239,7 @@ export default function Contact() {
                 <div className="bm-hq-info-item">
                   <div className="bm-hq-info-text">
                     <span className="bm-hq-info-label">{isEn ? 'Business Registration' : '사업자등록번호'}</span>
-                    <span className="bm-hq-info-val">132-81-49973</span>
+                    <span className="bm-hq-info-val">{txt('hqBizNo')}</span>
                   </div>
                 </div>
 
@@ -308,17 +268,17 @@ export default function Contact() {
 
             {/* 우측 : 명함을 위아래 카드섹션으로 */}
             <div className="bm-sales-stack">
-              {salesTeams.map(team => {
-                const currentImg = isEn ? team.imgEn : team.imgKr;
+              {businessCards.map(team => {
+                const currentImg = isEn ? (team.imgEn || team.imgKr) : (team.imgKr || team.imgEn);
                 return (
                   <div key={team.id} className="bm-sales-card">
                     <div className="bm-sales-card-body">
                       <div className="bm-sales-card-head">
                         <span className="bm-sales-team-badge">
-                          {isEn ? team.teamNameEn : team.teamNameKo}
+                          {isEn ? team.titleEn : team.titleKo}
                         </span>
                         <span className="bm-sales-scope-pill">
-                          {isEn ? team.scopePillEn : team.scopePillKo}
+                          {isEn ? team.scopeEn : team.scopeKo}
                         </span>
                       </div>
 
@@ -341,8 +301,8 @@ export default function Contact() {
                           img: currentImg,
                           name: isEn ? team.personNameEn : team.personNameKo,
                           title: isEn
-                            ? `${team.teamNameEn} · ${team.personNameEn} ${team.personTitleEn}`
-                            : `${team.teamNameKo} · ${team.personNameKo} ${team.personTitleKo}`
+                            ? `${team.titleEn} · ${team.personNameEn} ${team.personTitleEn}`
+                            : `${team.titleKo} · ${team.personNameKo} ${team.personTitleKo}`
                         })}
                         onMouseLeave={() => setHoveredCard(null)}
                       >
@@ -362,14 +322,12 @@ export default function Contact() {
         {/* ====== 3. 스마트 B2B 문의 접수 폼 ====== */}
         <section style={{ marginBottom: '90px' }}>
           <div className="bm-contact-section-head">
-            <span className="bm-contact-tag">BUSINESS INQUIRY</span>
+            <span className="bm-contact-tag">{txt('formEyebrow')}</span>
             <h2 className="bm-contact-title">
-              {isEn ? 'Submit Business Inquiry' : '스마트 B2B 문의 접수'}
+              {txt('formTitle')}
             </h2>
-            <p className="bm-contact-desc">
-              {isEn
-                ? 'Please fill out the form below with your requirements. We assign a dedicated manager and respond promptly.'
-                : '희망하시는 협력 분야를 선택하신 후 세부 내용을 남겨주시면, 담당 영업팀이 검토 후 신속히 맞춤 제안을 드립니다.'}
+            <p className="bm-contact-desc" style={{ whiteSpace: 'pre-line' }}>
+              {txt('formBody')}
             </p>
           </div>
 

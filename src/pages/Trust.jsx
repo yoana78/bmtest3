@@ -7,11 +7,12 @@
 // 6. 연도별 글로벌 엑스포 전시 갤러리 (2019~2025, 라이트박스 팝업 및 이전/다음 탐색)
 // 7. 대형 유통 네트워크 및 펫 전문 유통사 파트너 로고 쇼케이스
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { partners } from '../data/partners';
-import { petRetailPartners } from '../data/petRetailPartners';
-import { expoPhotos } from '../data/expo';
+import { useData } from '../context/DataContext';
+import { useSiteList } from '../content/siteLists';
+import { usePageContent } from '../content/usePageContent';
+import { buildExpoData } from '../content/expoData';
 import iso14001Logo from '../assets/cert_logos/iso14001.png';
 import iso22000Logo from '../assets/cert_logos/iso22000.png';
 import haccpLogo from '../assets/cert_logos/haccp.png';
@@ -27,6 +28,11 @@ const certLogoMap = {
 export default function Trust() {
   const { lang } = useLanguage();
   const isEn = lang === 'en';
+  const { txt, img } = usePageContent('trust');
+  const partners = useSiteList('partners');
+  const petRetailPartners = useSiteList('petRetailPartners');
+  const { siteSettings } = useData();
+  const { photos: expoPhotos, meta: expoYearMeta } = useMemo(() => buildExpoData(siteSettings?.expoYears), [siteSettings?.expoYears]);
 
   // 모달 상태 관리
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(null);
@@ -193,34 +199,6 @@ export default function Trust() {
     }
   ];
 
-  // 박람회 연도별 대표 제목/설명 (중복 년도 제거)
-  const expoYearMeta = {
-    '2019': {
-      labelKo: '미국 올랜도 글로벌 펫 엑스포',
-      labelEn: 'Global Pet Expo, Orlando',
-      descKo: '세계 최대 규모의 미국 올랜도 글로벌 펫 엑스포 참가 현장',
-      descEn: "Boomyung's international booth at Global Pet Expo, Orlando, USA."
-    },
-    '2023': {
-      labelKo: '태국 국제 펫 박람회 (Pet Fair SEA)',
-      labelEn: 'Pet Fair South East Asia',
-      descKo: '방콕 현지 부명 브랜드 단독 부스 및 동남아 바이어 수출 상담',
-      descEn: "Showcasing Boomyung's premium brands to global distributors in Bangkok."
-    },
-    '2024': {
-      labelKo: '태국 국제 펫 박람회 (Pet Fair SEA)',
-      labelEn: 'Pet Fair South East Asia',
-      descKo: '혁신적인 K-펫푸드 라인업 전시 및 글로벌 파트너십 확대',
-      descEn: "Expanding international distribution network with innovative K-Pet products."
-    },
-    '2025': {
-      labelKo: '태국 국제 펫 박람회 (Pet Fair SEA)',
-      labelEn: 'Pet Fair South East Asia',
-      descKo: '지속 가능한 펫 케어 솔루션 글로벌 공개 및 상담 현장',
-      descEn: "Presenting sustainable pet care solutions to international partners."
-    }
-  };
-
   const expoYearGroups = [];
   expoPhotos.forEach((photo, index) => {
     const meta = expoYearMeta[photo.year] || { labelKo: photo.year, labelEn: photo.year, descKo: '', descEn: '' };
@@ -253,19 +231,17 @@ export default function Trust() {
       <section
         className="bm-sub-hero"
         style={{
-          backgroundImage: "url('./assets/trust_hero.png')"
+          backgroundImage: `url('${img('heroImage')}')`
         }}
       >
         <div className="bm-sub-hero-overlay" />
         <div className="bm-sub-hero-content animate-on-scroll fade-up is-visible">
-          <span className="bm-sub-hero-tag">GLOBAL STANDARDS & VERIFIED QUALITY</span>
+          <span className="bm-sub-hero-tag">{txt('heroEyebrow')}</span>
           <h1 className="bm-sub-hero-title">
-            {isEn ? 'Trust & Certification' : '신뢰와 인증'}
+            {txt('heroTitle')}
           </h1>
-          <p className="bm-sub-hero-desc">
-            {isEn
-              ? 'International safety standards, proprietary patented technologies, and proven global exhibitions.'
-              : '국제 표준 품질 인증 시스템과 독자적 특허 기술력, 세계 유수 박람회 출품을 통해 부명의 정직한 신뢰를 입증합니다.'}
+          <p className="bm-sub-hero-desc" style={{ whiteSpace: 'pre-line' }}>
+            {txt('heroBody')}
           </p>
         </div>
       </section>
@@ -275,13 +251,11 @@ export default function Trust() {
         <section id="certs" style={{ marginBottom: '88px' }}>
           <div className="bm-trust-section-head">
             <div>
-              <span className="bm-trust-tag">GLOBAL STANDARDS</span>
-              <h2 className="bm-trust-title">{isEn ? 'Quality Management Systems' : '국제 공인 품질 및 안전 인증'}</h2>
+              <span className="bm-trust-tag">{txt('certEyebrow')}</span>
+              <h2 className="bm-trust-title">{txt('certTitle')}</h2>
             </div>
-            <p className="bm-trust-desc">
-              {isEn
-                ? 'Certified management systems ensuring uncompromising food safety, hygiene, and eco-friendly standards.'
-                : '식품 안전, 위생, 환경 기준을 준수하며 철저한 품질 관리 시스템을 바탕으로 생산합니다.'}
+            <p className="bm-trust-desc" style={{ whiteSpace: 'pre-line' }}>
+              {txt('certBody')}
             </p>
           </div>
 
@@ -314,13 +288,11 @@ export default function Trust() {
         <section id="patents" style={{ marginBottom: '80px' }}>
           <div className="bm-trust-section-head">
             <div>
-              <span className="bm-trust-tag">INTELLECTUAL PROPERTY</span>
-              <h2 className="bm-trust-title">{isEn ? 'Patents & Registrations' : '독자적 특허 및 지식재산권'}</h2>
+              <span className="bm-trust-tag">{txt('patentEyebrow')}</span>
+              <h2 className="bm-trust-title">{txt('patentTitle')}</h2>
             </div>
-            <p className="bm-trust-desc">
-              {isEn
-                ? 'Proprietary manufacturing formulations, cat litter processing, and pet ergonomic design patents registered with KIPO.'
-                : '특허청(KIPO)에 정식 등록된 원료 코팅 배합, 벤토나이트·두부모래 제조, 반려용품 디자인 특허를 보유하고 있습니다.'}
+            <p className="bm-trust-desc" style={{ whiteSpace: 'pre-line' }}>
+              {txt('patentBody')}
             </p>
           </div>
 
@@ -349,13 +321,11 @@ export default function Trust() {
         <section id="expos" className="bm-expo-showcase-section">
           <div className="bm-trust-section-head">
             <div>
-              <span className="bm-trust-tag">GLOBAL EXHIBITION</span>
-              <h2 className="bm-trust-title">{isEn ? 'Global Exhibitions & Fairs' : '세계 펫 박람회 출품 현장'}</h2>
+              <span className="bm-trust-tag">{txt('expoEyebrow')}</span>
+              <h2 className="bm-trust-title">{txt('expoTitle')}</h2>
             </div>
-            <p className="bm-trust-desc">
-              {isEn
-                ? 'Showcasing Boomyung’s premium pet healthcare products on international stages and building global buyer trust.'
-                : '미국 올랜도, 방콕 등 전 세계 주요 펫 엑스포에 지속 참가하여 글로벌 바이어와 파트너십을 확장해 나가고 있습니다.'}
+            <p className="bm-trust-desc" style={{ whiteSpace: 'pre-line' }}>
+              {txt('expoBody')}
             </p>
           </div>
 
@@ -391,13 +361,11 @@ export default function Trust() {
         <section id="partners" style={{ marginBottom: '100px' }}>
           <div className="bm-trust-section-head">
             <div>
-              <span className="bm-trust-tag">DISTRIBUTION NETWORK</span>
-              <h2 className="bm-trust-title">{isEn ? 'Major Retail & Pet Specialty Partners' : '국내 대형 유통 네트워크 & 파트너사'}</h2>
+              <span className="bm-trust-tag">{txt('networkEyebrow')}</span>
+              <h2 className="bm-trust-title">{txt('networkTitle')}</h2>
             </div>
-            <p className="bm-trust-desc">
-              {isEn
-                ? 'Supplying premium verified pet products to nationwide hypermarkets, convenience stores, and specialized pet networks.'
-                : '이마트, 홈플러스, 롯데마트, 주요 편의점 및 펫 전문 유통망을 통해 대한민국 어디서나 부명의 제품을 만나실 수 있습니다.'}
+            <p className="bm-trust-desc" style={{ whiteSpace: 'pre-line' }}>
+              {txt('networkBody')}
             </p>
           </div>
 
@@ -410,7 +378,7 @@ export default function Trust() {
               {partners.map(p => (
                 <div key={p.id} className="bm-trust-partner-box">
                   <div className="bm-trust-partner-img-wrap">
-                    <img src={p.logo} alt={p.nameKo} loading="lazy" />
+                    <img src={p.logo} alt={p.nameKo} loading="lazy" style={{ transform: `scale(${Number(p.logoScale) || 1})` }} />
                   </div>
                   <span className="bm-trust-partner-name">{isEn ? p.nameEn : p.nameKo}</span>
                 </div>
@@ -429,7 +397,7 @@ export default function Trust() {
                   {p.logo ? (
                     <>
                       <div className="bm-trust-partner-img-wrap">
-                        <img src={p.logo} alt={p.nameKo} loading="lazy" />
+                        <img src={p.logo} alt={p.nameKo} loading="lazy" style={{ transform: `scale(${Number(p.logoScale) || 1})` }} />
                       </div>
                       <span className="bm-trust-partner-name">{isEn ? p.nameEn : p.nameKo}</span>
                     </>
