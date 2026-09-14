@@ -9,7 +9,8 @@
 .brand-detail-hero {
   background-color: var(--brand-bg);
   color: white;
-  padding: 60px 0;
+  /* 상단 고정 헤더(72px) 높이만큼 안쪽 여백을 더 줘서 헤더가 로고 위에 겹쳐 보이지 않게 함 */
+  padding: 132px 0 60px;
   position: relative;
   overflow: hidden;
 }
