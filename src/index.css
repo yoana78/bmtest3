@@ -5677,6 +5677,7 @@ h1, h2, h3, h4, h5, h6, p, span, a, label {
   .bm-infra-showcase-title { font-size: 1.35rem; }
   .bm-infra-features-grid { grid-template-columns: 1fr; }
   .bm-infra-mini-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .bm-ci-container { grid-template-columns: 1fr; }
   .bm-ci-symbol-stage { padding: 36px 20px; }
   .bm-ci-card { padding: 20px 18px; }
 
