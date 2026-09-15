@@ -36,9 +36,19 @@ function compressImage(file, { maxDimension = 1600, startQuality = 0.85, maxBase
       ctx.drawImage(img, 0, 0, width, height);
 
       // PNG(투명 배경)를 쓴 파일은 투명도를 지키기 위해 PNG로, 그 외는 용량이 훨씬 작은 JPEG로 인코딩
-      const keepPng = file.type === 'image/png';
+      let keepPng = file.type === 'image/png';
       let quality = startQuality;
       let dataUrl = canvas.toDataURL(keepPng ? 'image/png' : 'image/jpeg', quality);
+
+      // PNG has no quality setting, so an oversized PNG would hit the shrink loop below and lose
+      // most of its resolution (e.g. 1116x2000 -> 419x750). Flatten it on white and use JPEG at full size.
+      if (keepPng && dataUrl.length > maxBase64Length) {
+        keepPng = false;
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        dataUrl = canvas.toDataURL('image/jpeg', quality);
+      }
 
       // 여전히 너무 크면 품질을 낮추고, 품질을 최대로 낮췄는데도(또는 PNG라 품질 옵션이 없어서)
       // 여전히 크면 캔버스 크기 자체를 반복해서 줄인다 (가로로 긴 세로 인포그래픽처럼
@@ -93,7 +103,7 @@ function cropImageToBox(file, targetWidth, targetHeight, { maxBase64Length = 850
 
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      const keepPng = file.type === 'image/png';
+      let keepPng = file.type === 'image/png';
 
       const draw = () => {
         canvas.width = outW;
@@ -116,6 +126,12 @@ function cropImageToBox(file, targetWidth, targetHeight, { maxBase64Length = 850
       draw();
       let quality = 0.88;
       let dataUrl = canvas.toDataURL(keepPng ? 'image/png' : 'image/jpeg', quality);
+      // Same PNG issue as compressImage: switch an oversized PNG to JPEG instead of shrinking it.
+      if (keepPng && dataUrl.length > maxBase64Length) {
+        keepPng = false;
+        draw();
+        dataUrl = canvas.toDataURL('image/jpeg', quality);
+      }
       while (dataUrl.length > maxBase64Length && (quality > 0.35 || outW > 400)) {
         if (quality > 0.35) {
           quality -= 0.08;
