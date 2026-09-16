@@ -922,12 +922,12 @@ export default function Admin() {
           )}
 
           {/* SECTION: "브랜드 관리" / "제품 관리" 탭 전환 버튼 */}
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '36px', borderBottom: '2px solid #E5E7EB', paddingBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '6px', marginBottom: '36px', borderBottom: '2px solid #E5E7EB', paddingBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
             <button
               onClick={() => setActiveTab('brand')}
               style={{
-                padding: '8px 14px',
-                fontSize: '0.8rem',
+                padding: '6px 10px',
+                fontSize: '0.76rem',
                 fontWeight: '700',
                 border: 'none',
                 borderRadius: '6px',
@@ -942,8 +942,8 @@ export default function Admin() {
             <button
               onClick={() => setActiveTab('product')}
               style={{
-                padding: '8px 14px',
-                fontSize: '0.8rem',
+                padding: '6px 10px',
+                fontSize: '0.76rem',
                 fontWeight: '700',
                 border: 'none',
                 borderRadius: '6px',
@@ -958,8 +958,8 @@ export default function Admin() {
             <button
               onClick={() => setActiveTab('settings')}
               style={{
-                padding: '8px 14px',
-                fontSize: '0.8rem',
+                padding: '6px 10px',
+                fontSize: '0.76rem',
                 fontWeight: '700',
                 border: 'none',
                 borderRadius: '6px',
@@ -974,8 +974,8 @@ export default function Admin() {
             <button
               onClick={() => setActiveTab('pages')}
               style={{
-                padding: '8px 14px',
-                fontSize: '0.8rem',
+                padding: '6px 10px',
+                fontSize: '0.76rem',
                 fontWeight: '700',
                 border: 'none',
                 borderRadius: '6px',
@@ -990,8 +990,8 @@ export default function Admin() {
             <button
               onClick={() => setActiveTab('security')}
               style={{
-                padding: '8px 14px',
-                fontSize: '0.8rem',
+                padding: '6px 10px',
+                fontSize: '0.76rem',
                 fontWeight: '700',
                 border: 'none',
                 borderRadius: '6px',
@@ -1013,8 +1013,8 @@ export default function Admin() {
               }}
               style={{
                 marginLeft: 'auto',
-                padding: '7px 11px',
-                fontSize: '0.75rem',
+                padding: '6px 8px',
+                fontSize: '0.7rem',
                 fontWeight: '600',
                 border: '1px solid #FCA5A5',
                 borderRadius: '6px',
@@ -1034,8 +1034,8 @@ export default function Admin() {
                 }
               }}
               style={{
-                padding: '7px 11px',
-                fontSize: '0.75rem',
+                padding: '6px 8px',
+                fontSize: '0.7rem',
                 fontWeight: '600',
                 border: '1px solid #BFDBFE',
                 borderRadius: '6px',
