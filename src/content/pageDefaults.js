@@ -121,6 +121,36 @@ export const PAGE_SCHEMA = {
     ],
   },
 
+  brands: {
+    label: '브랜드',
+    sections: [
+      {
+        label: '상단 배너',
+        fields: [
+          { key: 'heroImage', label: '배경 사진', type: 'image', width: 2560, height: 1440, src: './assets/stock/unsplash-1543466835-00a7907e9de1.jpg' },
+          { key: 'heroEyebrow', label: '작은 영문 라벨', type: 'text', size: '0.82rem', koOnly: true, ko: 'OUR BRAND ECOSYSTEM' },
+          { key: 'heroTitle', label: '페이지 제목', type: 'textarea', size: '2.5rem', ko: '신뢰와 품질로 완성한 브랜드 포트폴리오', en: 'Global Brand Portfolio' },
+          { key: 'heroBody', label: '본문', type: 'textarea', size: '1.05rem', ko: '부명이 직접 연구·제조하는 자체 브랜드부터 전 세계에서 엄선한 프리미엄 수입 브랜드까지, 모든 반려동물의 건강하고 행복한 삶을 위한 라인업을 소개합니다.', en: 'From authentic in-house pet care brands to globally proven imports, introducing BOOMYOUNG’s comprehensive lineup.' },
+        ],
+      },
+    ],
+  },
+
+  catalog: {
+    label: '제품 카탈로그',
+    sections: [
+      {
+        label: '상단 배너',
+        fields: [
+          { key: 'heroImage', label: '배경 사진', type: 'image', width: 2560, height: 1440, src: './assets/stock/unsplash-1589924691995-400dc9ecc119.jpg' },
+          { key: 'heroEyebrow', label: '작은 영문 라벨', type: 'text', size: '0.82rem', koOnly: true, ko: 'ALL PRODUCT PORTFOLIO' },
+          { key: 'heroTitle', label: '페이지 제목', type: 'text', size: '2.5rem', ko: '제품 카다로그', en: 'Product Catalog' },
+          { key: 'heroBody', label: '본문', type: 'textarea', size: '1.05rem', ko: '자체 생산 프리미엄 펫푸드부터 엄선된 글로벌 수입 브랜드까지, 부명이 보증하는 고품질 제품들을 카테고리별로 만나보세요.', en: 'Explore our comprehensive range of specialized pet nutrition, hygienic cat litters, and professional supplies.' },
+        ],
+      },
+    ],
+  },
+
   trust: {
     label: '신뢰와 인증',
     sections: [

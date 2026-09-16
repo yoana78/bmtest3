@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useData } from '../context/DataContext';
+import { usePageContent } from '../content/usePageContent';
 
 // 수입 브랜드 원산지 정보 매핑
 const originMap = {
@@ -20,6 +21,7 @@ const originMap = {
 };
 
 export default function Brands() {
+  const { txt, img } = usePageContent('brands');
   const { lang } = useLanguage();
   const isEn = lang === 'en';
   const { brands: allBrands, products } = useData();
@@ -42,19 +44,17 @@ export default function Brands() {
       <section
         className="bm-sub-hero"
         style={{
-          backgroundImage: "url('./assets/stock/unsplash-1543466835-00a7907e9de1.jpg')"
+          backgroundImage: `url('${img('heroImage')}')`
         }}
       >
         <div className="bm-sub-hero-overlay" />
         <div className="bm-sub-hero-content animate-on-scroll fade-up is-visible">
-          <span className="bm-sub-hero-tag">OUR BRAND ECOSYSTEM</span>
+          <span className="bm-sub-hero-tag">{txt('heroEyebrow')}</span>
           <h1 className="bm-sub-hero-title">
-            {isEn ? 'Global Brand Portfolio' : '신뢰와 품질로 완성한 브랜드 포트폴리오'}
+            {txt('heroTitle')}
           </h1>
           <p className="bm-sub-hero-desc">
-            {isEn
-              ? 'From authentic in-house pet care brands to globally proven imports, introducing BOOMYOUNG’s comprehensive lineup.'
-              : '부명이 직접 연구·제조하는 자체 브랜드부터 전 세계에서 엄선한 프리미엄 수입 브랜드까지, 모든 반려동물의 건강하고 행복한 삶을 위한 라인업을 소개합니다.'}
+            {txt('heroBody')}
           </p>
         </div>
       </section>

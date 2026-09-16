@@ -10,6 +10,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useData } from '../context/DataContext';
+import { usePageContent } from '../content/usePageContent';
 import { translateIngredients } from '../utils/translateIngredients';
 
 const CATEGORIES = [
@@ -40,6 +41,7 @@ const petTypeKoMap = {
 const ITEMS_PER_PAGE = 24;
 
 export default function Catalog() {
+  const { txt, img } = usePageContent('catalog');
   const { lang } = useLanguage();
   const isEn = lang === 'en';
   const { brands, products = [] } = useData();
@@ -239,19 +241,17 @@ export default function Catalog() {
       <section
         className="bm-sub-hero"
         style={{
-          backgroundImage: "url('./assets/stock/unsplash-1589924691995-400dc9ecc119.jpg')"
+          backgroundImage: `url('${img('heroImage')}')`
         }}
       >
         <div className="bm-sub-hero-overlay" />
         <div className="bm-sub-hero-content animate-on-scroll fade-up is-visible">
-          <span className="bm-sub-hero-tag">ALL PRODUCT PORTFOLIO</span>
+          <span className="bm-sub-hero-tag">{txt('heroEyebrow')}</span>
           <h1 className="bm-sub-hero-title">
-            {isEn ? 'Product Catalog' : '제품 카다로그'}
+            {txt('heroTitle')}
           </h1>
           <p className="bm-sub-hero-desc">
-            {isEn
-              ? 'Explore our comprehensive range of specialized pet nutrition, hygienic cat litters, and professional supplies.'
-              : '자체 생산 프리미엄 펫푸드부터 엄선된 글로벌 수입 브랜드까지, 부명이 보증하는 고품질 제품들을 카테고리별로 만나보세요.'}
+            {txt('heroBody')}
           </p>
         </div>
       </section>
