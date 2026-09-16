@@ -83,7 +83,7 @@ export const PAGE_SCHEMA = {
       {
         label: '상단 배너',
         fields: [
-          { key: 'heroImage', label: '배경 사진', type: 'image', width: 2560, height: 1440, src: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=2560&q=80' },
+          { key: 'heroImage', label: '배경 사진', type: 'image', width: 2560, height: 1440, src: './assets/stock/unsplash-1522071820081-009f0129c71c.jpg' },
           { key: 'heroEyebrow', label: '작은 영문 라벨', type: 'text', size: '0.82rem', koOnly: true, ko: 'ABOUT BOOMYOUNG' },
           { key: 'heroTitle', label: '페이지 제목', type: 'textarea', size: '2.5rem', ko: '반려동물과 반려인의 행복한 내일을 열어갑니다', en: 'Opening a Healthier Tomorrow for Pets' },
           { key: 'heroBody', label: '본문', type: 'textarea', size: '1.05rem', ko: '30년 이상 축적된 정직한 기술과 원칙 있는 품질, 견고한 신뢰를 바탕으로 펫 헬스케어의 미래를 창조합니다.', en: 'Built upon 30 years of honest technology, uncompromising safety protocols, and enduring customer trust.' },

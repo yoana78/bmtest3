@@ -42,7 +42,7 @@ export default function Brands() {
       <section
         className="bm-sub-hero"
         style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=2560&q=80')"
+          backgroundImage: "url('./assets/stock/unsplash-1543466835-00a7907e9de1.jpg')"
         }}
       >
         <div className="bm-sub-hero-overlay" />
