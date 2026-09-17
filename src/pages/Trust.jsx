@@ -401,31 +401,20 @@ export default function Trust() {
         </section>
       </div>
 
-      {/* ====== 8. 품질 인증서 모달 팝업 ====== */}
+      {/* ====== 8. 품질 인증서 모달 팝업 (원본 홈페이지와 동일한 스타일) ====== */}
       {selectedCert !== null && (
-        <div className="bm-lightbox-overlay" onClick={() => setSelectedCert(null)}>
-          <div className="bm-lightbox-box cert-doc-modal" onClick={e => e.stopPropagation()}>
-            <button
-              className="bm-modal-close-btn"
-              onClick={() => setSelectedCert(null)}
-              style={{ position: 'absolute', top: '14px', right: '14px', zIndex: 10 }}
-            >
-              ✕
-            </button>
-            <div className="bm-lightbox-media-stage">
-              <img
-                src={isEn ? selectedCert.imageEn : selectedCert.image}
-                alt={isEn ? selectedCert.titleEn : selectedCert.titleKo}
-              />
-            </div>
-            <div className="bm-lightbox-footer">
+        <div className="modal-backdrop" onClick={() => setSelectedCert(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <button className="modal-close-btn" onClick={() => setSelectedCert(null)}>&times;</button>
+            <img
+              src={isEn ? selectedCert.imageEn : selectedCert.image}
+              alt={isEn ? selectedCert.titleEn : selectedCert.titleKo}
+            />
+            <div className="modal-caption">
               <div>
-                <h4 style={{ color: '#FFFFFF', margin: 0, fontSize: '1.05rem', fontWeight: 800 }}>
+                <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 500 }}>
                   {selectedCert.code} — {isEn ? selectedCert.titleEn : selectedCert.titleKo}
                 </h4>
-                <p style={{ color: '#94A3B8', margin: '4px 0 0', fontSize: '0.84rem' }}>
-                  {isEn ? selectedCert.descEn : selectedCert.descKo}
-                </p>
               </div>
             </div>
           </div>
