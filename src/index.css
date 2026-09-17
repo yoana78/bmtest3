@@ -5417,20 +5417,22 @@ h1, h2, h3, h4, h5, h6, p, span, a, label {
 }
 
 .bm-lightbox-box.cert-doc-modal .bm-lightbox-media-stage {
-  padding: 16px 20px 12px;
+  padding: 0;
   background: #0B132B;
   overflow: hidden;
   max-height: calc(92vh - 85px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .bm-lightbox-box.cert-doc-modal .bm-lightbox-media-stage img {
-  max-height: calc(92vh - 120px);
+  max-height: calc(92vh - 85px);
   max-width: 100%;
   width: auto;
   height: auto;
   object-fit: contain;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  border-radius: 4px;
+  display: block;
 }
 
 .bm-lightbox-box.cert-doc-modal .bm-lightbox-footer {
