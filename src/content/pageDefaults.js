@@ -157,7 +157,7 @@ export const PAGE_SCHEMA = {
       {
         label: '상단 배너',
         fields: [
-          { key: 'heroImage', label: '배경 사진', type: 'image', width: 2560, height: 1440, src: './assets/trust_hero.png' },
+          { key: 'heroImage', label: '배경 사진', type: 'image', width: 2560, height: 1440, src: './assets/trust_hero.jpg' },
           { key: 'heroEyebrow', label: '작은 영문 라벨', type: 'text', size: '0.82rem', koOnly: true, ko: 'GLOBAL STANDARDS & VERIFIED QUALITY' },
           { key: 'heroTitle', label: '페이지 제목', type: 'text', size: '2.5rem', ko: '신뢰와 인증', en: 'Trust & Certification' },
           { key: 'heroBody', label: '본문', type: 'textarea', size: '1.05rem', ko: '국제 표준 품질 인증 시스템과 독자적 특허 기술력, 세계 유수 박람회 출품을 통해 부명의 정직한 신뢰를 입증합니다.', en: 'International safety standards, proprietary patented technologies, and proven global exhibitions.' },

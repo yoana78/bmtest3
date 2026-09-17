@@ -71,8 +71,8 @@ export default function Home() {
     './assets/homad/homad_04.jpg'
   ];
   const wellzenImages = [
-    './assets/wellzen/wellzen_01.png',
-    './assets/wellzen/wellzen_02.png'
+    './assets/wellzen/wellzen_01.jpg',
+    './assets/wellzen/wellzen_02.jpg'
   ];
   const qingdaoImages = [
     './assets/china/qingdao-factory.jpg',

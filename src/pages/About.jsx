@@ -13,8 +13,8 @@ import { useSiteList } from '../content/siteLists';
 
 // 인프라 섹션 이미지 데이터
 const wellzenImages = [
-  './assets/wellzen/wellzen_01.png',
-  './assets/wellzen/wellzen_02.png'
+  './assets/wellzen/wellzen_01.jpg',
+  './assets/wellzen/wellzen_02.jpg'
 ];
 
 const homadImages = [
@@ -144,7 +144,7 @@ export default function About() {
       descKo: '반려동물의 생애주기별 건강 특성을 과학적으로 분석하고, 고품질 기능성 원료 검증과 배합 기술 혁신을 주도하는 전문 연구 기관입니다.',
       descEn: 'Specialized healthcare research center analyzing pet life-stages, pioneering raw material verification and functional formula innovation.',
       mediaType: 'image',
-      coverImage: './assets/wellzen/wellzen_01.png',
+      coverImage: './assets/wellzen/wellzen_01.jpg',
       images: wellzenImages,
       features: [
         { nameKo: '영양 성분 정밀 분석', nameEn: 'Nutritional Analysis', subKo: 'AAFCO 기준 준수 검증', subEn: 'AAFCO compliance audit' },
