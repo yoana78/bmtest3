@@ -206,7 +206,7 @@ export default function ProductDetail() {
                         key={idx}
                         src={src}
                         alt={`${isEn ? product.nameEn : product.nameKo} 상세이미지 ${idx + 1}`}
-                        style={{ width: '100%', height: 'auto', borderRadius: '8px', border: '1px solid #EAEAEA' }}
+                        style={{ maxWidth: '100%', width: 'auto', height: 'auto', borderRadius: '8px', border: '1px solid #EAEAEA', display: 'block', margin: '0 auto' }}
                       />
                     ))}
                   </div>
