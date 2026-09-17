@@ -6055,13 +6055,6 @@ img[alt="아무도없개"] {
   border-color: rgba(0, 102, 179, 0.3);
 }
 
-.bm-sales-card-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 18px;
-}
-
 .bm-sales-team-badge {
   font-size: 0.78rem;
   font-weight: 800;
@@ -6107,8 +6100,10 @@ img[alt="아무도없개"] {
   color: var(--bm-text-dark);
   margin-bottom: 4px;
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 8px;
+  column-gap: 10px;
 }
 
 .bm-sales-person-title {

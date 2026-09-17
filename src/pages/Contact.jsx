@@ -273,20 +273,17 @@ export default function Contact() {
                 return (
                   <div key={team.id} className="bm-sales-card">
                     <div className="bm-sales-card-body">
-                      <div className="bm-sales-card-head">
-                        <span className="bm-sales-team-badge">
-                          {isEn ? team.titleEn : team.titleKo}
-                        </span>
-                        <span className="bm-sales-scope-pill">
-                          {isEn ? team.scopeEn : team.scopeKo}
-                        </span>
-                      </div>
-
                       <div className="bm-sales-person-info">
                         <div className="bm-sales-person-name">
                           {isEn ? team.personNameEn : team.personNameKo}
                           <span className="bm-sales-person-title">
                             {isEn ? team.personTitleEn : team.personTitleKo}
+                          </span>
+                          <span className="bm-sales-team-badge">
+                            {isEn ? team.titleEn : team.titleKo}
+                          </span>
+                          <span className="bm-sales-scope-pill">
+                            {isEn ? team.scopeEn : team.scopeKo}
                           </span>
                         </div>
                         <p className="bm-sales-scope-desc">
