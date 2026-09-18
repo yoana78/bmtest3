@@ -144,7 +144,7 @@ export const PAGE_SCHEMA = {
         fields: [
           { key: 'heroImage', label: '배경 사진', type: 'image', width: 2560, height: 1440, src: './assets/stock/unsplash-1589924691995-400dc9ecc119.jpg' },
           { key: 'heroEyebrow', label: '작은 영문 라벨', type: 'text', size: '0.82rem', koOnly: true, ko: 'ALL PRODUCT PORTFOLIO' },
-          { key: 'heroTitle', label: '페이지 제목', type: 'text', size: '2.5rem', ko: '제품 카다로그', en: 'Product Catalog' },
+          { key: 'heroTitle', label: '페이지 제목', type: 'text', size: '2.5rem', ko: '제품 카탈로그', en: 'Product Catalog' },
           { key: 'heroBody', label: '본문', type: 'textarea', size: '1.05rem', ko: '자체 생산 프리미엄 펫푸드부터 엄선된 글로벌 수입 브랜드까지, 부명이 보증하는 고품질 제품들을 카테고리별로 만나보세요.', en: 'Explore our comprehensive range of specialized pet nutrition, hygienic cat litters, and professional supplies.' },
         ],
       },
