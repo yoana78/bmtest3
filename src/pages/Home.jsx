@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useData } from '../context/DataContext';
@@ -125,11 +125,29 @@ export default function Home() {
   const nextGalleryImage = () => setGalleryIndex(i => (i + 1) % galleryImages.length);
   const [showLogisticsVideo, setShowLogisticsVideo] = useState(false);
 
+  // 물류센터 영상(7MB)은 히어로 영상과 동시에 미리 받아두면 초기 로딩이 느려지므로,
+  // 카드가 화면 근처에 들어올 때만 <video>를 실제로 마운트해서 그때 받기 시작한다.
+  const [logisticsVideoInView, setLogisticsVideoInView] = useState(false);
+  const logisticsVideoCardRef = useRef(null);
+  useEffect(() => {
+    const el = logisticsVideoCardRef.current;
+    if (!el) return;
+    if (!window.IntersectionObserver) { setLogisticsVideoInView(true); return; }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setLogisticsVideoInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="bm-home">
-      {/* 물류센터 팝업 영상 프리로드용 */}
-      <video src="./assets/logistics/logistics.mp4" preload="auto" muted style={{ display: 'none' }} />
-
       {/* ====== SECTION 1: 영상 히어로 (풀화면 비디오 + 타이핑 효과) ====== */}
       <section className="bm-hero">
         {/* 풀화면 비디오 배경 */}
@@ -304,18 +322,21 @@ export default function Home() {
               </div>
 
               <div
+                ref={logisticsVideoCardRef}
                 className="bm-infra-card bm-infra-media-card bm-infra-video-card animate-child slide-right"
                 onClick={() => setShowLogisticsVideo(true)}
                 title={isEn ? 'Click to play full video' : '클릭하여 영상 전체화면 재생'}
               >
-                <video
-                  src="./assets/logistics/logistics.mp4"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  className="bm-infra-video"
-                />
+                {logisticsVideoInView && (
+                  <video
+                    src="./assets/logistics/logistics.mp4"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="bm-infra-video"
+                  />
+                )}
               </div>
             </div>
 
